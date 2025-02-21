@@ -7,9 +7,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import MenuButton from './MenuButton';
-import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
+import MenuButton from './MenuButton.tsx';
+import MenuContent from './MenuContent.tsx';
+import CardAlert from './CardAlert.tsx';
 
 interface SideMenuMobileProps {
   open: boolean | undefined;

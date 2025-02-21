@@ -63,7 +63,7 @@ export default function SelectContent() {
             <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Sitemark-web" secondary="Web app" />
+        <ListItemText primary="ICPC" secondary="User profile" />
       </MenuItem>
       <MenuItem value={10}>
         <ListItemAvatar>

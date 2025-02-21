@@ -1,10 +1,9 @@
 import React from 'react';
-// import Dashboard from './dashboard/Dashboard.tsx'; // 根据你放置的路径来改
-import Coding from './dashboard/Coding.tsx';
+import Practice from './dashboard/Practice.tsx';
 function App() {
   return (
     <div>
-      <Coding />
+      <Practice />
     </div>
   );
 }

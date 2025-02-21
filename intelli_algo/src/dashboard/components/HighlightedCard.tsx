@@ -22,10 +22,10 @@ export default function HighlightedCard() {
           gutterBottom
           sx={{ fontWeight: '600' }}
         >
-          Explore your data
+          Merge Sort: Time Complexity Analysis
         </Typography>
         <Typography sx={{ color: 'text.secondary', mb: '8px' }}>
-          Uncover performance and visitor insights with our data wizardry.
+        Merge Sort is a classic divide-and-conquer algorithm used to sort an array or list efficiently. The algorithm works by recursively splitting the input list into two halves until each sublist contains a single element, and then merging those sublists back together in sorted order.
         </Typography>
         <Button
           variant="contained"

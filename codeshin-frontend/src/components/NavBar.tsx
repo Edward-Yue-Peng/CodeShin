@@ -11,7 +11,7 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useTheme } from '@mui/material/styles';
-
+import { useNavigate } from 'react-router-dom';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -23,7 +23,6 @@ interface NavBarProps {
     onToggleAIPanel: () => void;
     onOpenUserMenu: (event: React.MouseEvent<HTMLElement>) => void;
     pages: string[];
-    // 新增主题模式相关 props
     currentMode: 'system' | 'light' | 'dark';
     onChangeColorMode: (mode: 'system' | 'light' | 'dark') => void;
 }
@@ -36,6 +35,7 @@ const NavBar: React.FC<NavBarProps> = ({
                                            onChangeColorMode,
                                        }) => {
     const theme = useTheme();
+    const navigate = useNavigate();
 
     // 用于主题模式菜单
     const [anchorElTheme, setAnchorElTheme] = React.useState<null | HTMLElement>(null);
@@ -86,7 +86,11 @@ const NavBar: React.FC<NavBarProps> = ({
                     {/* 中间页面按钮 */}
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
                         {pages.map((page) => (
-                            <Button key={page} color="inherit">
+                            <Button
+                                key={page}
+                                color="inherit"
+                                onClick={() => navigate(page.toLowerCase())}
+                            >
                                 {page}
                             </Button>
                         ))}

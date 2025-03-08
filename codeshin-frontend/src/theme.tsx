@@ -5,10 +5,10 @@ import { red } from '@mui/material/colors';
 /**
  * 根据传入的 mode 返回自定义主题
  * @param mode 'light' | 'dark' | 'system'
- *   当 mode 为 system 时，在 App 中会根据系统偏好决定实际使用 light 或 dark
+ *   当 mode 为 system 时，在 Practice 中会根据系统偏好决定实际使用 light 或 dark
  */
 export const getTheme = (mode: 'light' | 'dark' | 'system') => {
-  // 默认：若是 system 模式，则由 App 决定，这里可以先设置为 light 作为默认
+  // 默认：若是 system 模式，则由 Practice 决定，这里可以先设置为 light 作为默认
   const resolvedMode: 'light' | 'dark' = mode === 'system' ? 'light' : mode;
   return createTheme({
     cssVariables: true,

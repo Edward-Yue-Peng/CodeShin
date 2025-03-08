@@ -30,6 +30,7 @@ const Description: React.FC = () => {
                 </Typography>
 
                 {/* Algorithm Steps */}
+                <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ lineHeight: 1.8 }}>
                     Steps:
                 </Typography>
@@ -38,17 +39,20 @@ const Description: React.FC = () => {
                     2️⃣ <strong>Recursively Sort</strong>: Apply merge sort on both halves separately.<br/>
                     3️⃣ <strong>Merge</strong>: Combine the two sorted halves back into a single sorted array.
                 </Typography>
-
-                {/* Time Complexity */}
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ lineHeight: 1.8 }}>
-                    Time Complexity:
-                </Typography>
-                <Typography variant="body2" color="text.secondary" component="p" sx={{ lineHeight: 1.8 }}>
-                    Merge Sort has a time complexity of <strong>O(n log n)</strong>, making it efficient for large datasets.
-                    It maintains this performance even in the <strong>worst-case scenario</strong>.
-                </Typography>
+                </Box>
+               {/* Time Complexity */}
+                <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ lineHeight: 1.8 }}>
+                        Time Complexity:
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" component="p" sx={{ lineHeight: 1.8 }}>
+                        Merge Sort has a time complexity of <strong>O(n log n)</strong>, making it efficient for large datasets.
+                        It maintains this performance even in the <strong>worst-case scenario</strong>.
+                    </Typography>
+                </Box>
 
                 {/* Example */}
+                <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1" fontWeight="bold" color="primary" gutterBottom sx={{ lineHeight: 1.8 }}>
                     Example:
                 </Typography>
@@ -60,6 +64,7 @@ const Description: React.FC = () => {
                         <strong>Output:</strong> [3, 9, 10, 27, 38, 43, 82]
                     </Typography>
                 </Paper>
+                </Box>
             </Box>
         </Paper>
     );

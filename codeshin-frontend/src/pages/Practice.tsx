@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/Practice.tsx
 
 import React, { useState, useRef, lazy, Suspense } from 'react';
 import Box from '@mui/material/Box';
@@ -6,13 +6,13 @@ import Split from 'react-split';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import NavBar from './components/NavBar';
-import Description from './components/Description';
+import NavBar from '../components/NavBar';
+import Description from '../components/Description';
 
-const CodeEditor = lazy(() => import('./components/CodeEditor'));
-const AIPanel = lazy(() => import('./components/AIPanel'));
+const CodeEditor = lazy(() => import('../components/CodeEditor'));
+const AIPanel = lazy(() => import('../components/AIPanel'));
 
-function App() {
+function Practice() {
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
     const [storedThreeSizes, setStoredThreeSizes] = useState<number[]>([25, 50, 25]);
     const [aiVisible, setAiVisible] = useState(true);
@@ -128,4 +128,4 @@ function App() {
     );
 }
 
-export default App;
+export default Practice;

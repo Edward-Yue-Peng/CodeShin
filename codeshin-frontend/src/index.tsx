@@ -17,6 +17,7 @@ root.render(
                     <Route path="/mobile" element={<MobileWarning />} />
                     <Route path="/" element={<Practice />} />
                     <Route path="/home" element={<Home />} />
+                    <Route path="/practice" element={<Practice />} />
                 </Routes>
             </OrientationGuard>
         </BrowserRouter>

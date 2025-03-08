@@ -6,12 +6,12 @@ import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useTheme } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -82,18 +82,25 @@ const NavBar: React.FC<NavBarProps> = ({
                     >
                         CODESHIN 源神
                     </Typography>
-
-                    {/* 中间页面按钮 */}
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-                        {pages.map((page) => (
-                            <Button
-                                key={page}
-                                color="inherit"
-                                onClick={() => navigate(page.toLowerCase())}
-                            >
-                                {page}
-                            </Button>
-                        ))}
+                        {pages.map((page) => {
+                            const path = page.toLowerCase() === 'practice' ? '/' : `/${page.toLowerCase()}`;
+                            const location = useLocation();  // 获取当前路径
+
+                            return (
+                                <Button
+                                    key={page}
+                                    color="inherit"
+                                    onClick={() => {
+                                        if (location.pathname !== path) {  // 仅在不同路径时导航
+                                            navigate(path);
+                                        }
+                                    }}
+                                >
+                                    {page}
+                                </Button>
+                            );
+                        })}
                     </Box>
 
                     <Box sx={{ flexGrow: 1 }} />

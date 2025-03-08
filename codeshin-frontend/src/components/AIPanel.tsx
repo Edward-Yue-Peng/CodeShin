@@ -39,8 +39,8 @@ const AIPanel: React.FC = () => {
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* 标题区域 */}
-            <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="h6">CODESHIN AI</Typography>
+            <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="h6" align="center">CodeShinAI</Typography>
             </Box>
             {/* 聊天记录 */}
             <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto', backgroundColor: 'background.default' }}>
@@ -97,6 +97,7 @@ const AIPanel: React.FC = () => {
                     variant="outlined"
                     size="small"
                     value={input}
+                    onSubmit={handleSend}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
                 />

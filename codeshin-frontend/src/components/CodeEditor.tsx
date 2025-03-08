@@ -6,7 +6,6 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import PublishIcon from '@mui/icons-material/Publish';
 import { useTheme } from '@mui/material/styles';
 
 const CodeEditor: React.FC = () => {
@@ -69,7 +68,7 @@ if __name__ == '__main__':
                 defaultValue={defaultCode}
                 language="python"
                 theme={monacoTheme}
-                options={{ automaticLayout: true, fontSize: 16 }}
+                options={{ automaticLayout: true, fontSize: 16 ,minimap: { enabled: false }}}
                 height="100%"
                 width="100%"
             />

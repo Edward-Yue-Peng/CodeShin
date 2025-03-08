@@ -5,9 +5,14 @@ import Editor from '@monaco-editor/react';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import PublishIcon from '@mui/icons-material/Publish';
+import { useTheme } from '@mui/material/styles';
 
 const CodeEditor: React.FC = () => {
+    const theme = useTheme();
+    const monacoTheme = theme.palette.mode === 'dark' ? 'vs-dark' : 'vs-light';
+
     const defaultCode = `def merge_sort(arr):
     if len(arr) <= 1:
         return arr
@@ -56,14 +61,14 @@ if __name__ == '__main__':
                     <EditNoteIcon />
                 </IconButton>
                 <IconButton size="small" color="primary" sx={{ ml: 'auto' }}>
-                    <PublishIcon />
+                    <TaskAltIcon />
                 </IconButton>
             </Box>
             {/* 编辑器区域 */}
             <Editor
                 defaultValue={defaultCode}
                 language="python"
-                theme="vs-light"
+                theme={monacoTheme}
                 options={{ automaticLayout: true, fontSize: 16 }}
                 height="100%"
                 width="100%"

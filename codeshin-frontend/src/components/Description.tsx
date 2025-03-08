@@ -1,10 +1,31 @@
 // src/components/Description.tsx
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import {Box, IconButton, Typography} from '@mui/material';
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import TerminalIcon from "@mui/icons-material/Terminal";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import PublishIcon from "@mui/icons-material/Publish";
+import Button from "@mui/material/Button";
 
 const Description: React.FC = () => {
     return (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Box
+                sx={{
+                    p: 1,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    display: 'flex',
+                    gap: 1,
+                }}
+            >
+                <Button variant="outlined" size="small">
+                    SUBMIT
+                </Button>
+                <IconButton size="small" color="primary" sx={{ ml: 'auto' }}>
+                    <PublishIcon />
+                </IconButton>
+            </Box>
             {/* 题目正文 */}
             <Box sx={{ p: 2, flexGrow: 1, overflow: 'auto' }}>
                 <Typography variant="h5" gutterBottom>

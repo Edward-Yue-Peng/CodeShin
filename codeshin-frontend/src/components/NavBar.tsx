@@ -8,35 +8,58 @@ import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { useTheme } from '@mui/material/styles';
 
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 
 interface NavBarProps {
     onToggleAIPanel: () => void;
-    darkMode: boolean;
-    toggleDarkMode: () => void;
     onOpenUserMenu: (event: React.MouseEvent<HTMLElement>) => void;
     pages: string[];
+    // 新增主题模式相关 props
+    currentMode: 'system' | 'light' | 'dark';
+    onChangeColorMode: (mode: 'system' | 'light' | 'dark') => void;
 }
 
 const NavBar: React.FC<NavBarProps> = ({
                                            onToggleAIPanel,
-                                           darkMode,
-                                           toggleDarkMode,
                                            onOpenUserMenu,
                                            pages,
+                                           currentMode,
+                                           onChangeColorMode,
                                        }) => {
+    const theme = useTheme();
+
+    // 用于主题模式菜单
+    const [anchorElTheme, setAnchorElTheme] = React.useState<null | HTMLElement>(null);
+
+    const handleOpenThemeMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElTheme(event.currentTarget);
+    };
+    const handleCloseThemeMenu = () => {
+        setAnchorElTheme(null);
+    };
+
+    // 根据当前模式选择图标
+    const renderThemeIcon = () => {
+        if (currentMode === 'system') return <SettingsBrightnessIcon />;
+        if (currentMode === 'light') return <Brightness7Icon />;
+        return <Brightness4Icon />;
+    };
+
     return (
         <AppBar
             position="static"
             sx={{
                 boxShadow: 'none',
-                borderBottom: '1px solid',
-                borderColor: 'divider',
+                borderBottom: `1px solid ${theme.palette.divider}`,
             }}
         >
             <Container maxWidth="xl">
@@ -60,7 +83,7 @@ const NavBar: React.FC<NavBarProps> = ({
                         CODESHIN 源神
                     </Typography>
 
-                    {/* 中间添加页面按钮 */}
+                    {/* 中间页面按钮 */}
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
                         {pages.map((page) => (
                             <Button key={page} color="inherit">
@@ -71,16 +94,49 @@ const NavBar: React.FC<NavBarProps> = ({
 
                     <Box sx={{ flexGrow: 1 }} />
 
-                    {/* 暗黑模式切换 */}
-                    <Tooltip title="Toggle Dark Mode">
-                        <IconButton onClick={toggleDarkMode} color="inherit">
-                            {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                    {/* 主题模式切换按钮 */}
+                    <Tooltip title="Change Theme Mode">
+                        <IconButton onClick={handleOpenThemeMenu} sx={{ ml: 1 }} color="inherit">
+                            {renderThemeIcon()}
                         </IconButton>
                     </Tooltip>
+                    <Menu
+                        anchorEl={anchorElTheme}
+                        open={Boolean(anchorElTheme)}
+                        onClose={handleCloseThemeMenu}
+                    >
+                        <MenuItem
+                            selected={currentMode === 'system'}
+                            onClick={() => {
+                                onChangeColorMode('system');
+                                handleCloseThemeMenu();
+                            }}
+                        >
+                            System Default
+                        </MenuItem>
+                        <MenuItem
+                            selected={currentMode === 'light'}
+                            onClick={() => {
+                                onChangeColorMode('light');
+                                handleCloseThemeMenu();
+                            }}
+                        >
+                            Light Mode
+                        </MenuItem>
+                        <MenuItem
+                            selected={currentMode === 'dark'}
+                            onClick={() => {
+                                onChangeColorMode('dark');
+                                handleCloseThemeMenu();
+                            }}
+                        >
+                            Dark Mode
+                        </MenuItem>
+                    </Menu>
 
                     {/* AI 面板切换 */}
                     <Tooltip title="Toggle AI Panel">
-                        <IconButton onClick={onToggleAIPanel} color="inherit">
+                        <IconButton onClick={onToggleAIPanel} sx={{ ml: 1 }} color="inherit">
                             <SmartToyIcon />
                         </IconButton>
                     </Tooltip>

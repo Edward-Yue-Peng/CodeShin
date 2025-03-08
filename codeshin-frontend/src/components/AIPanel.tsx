@@ -1,8 +1,13 @@
 // src/components/AIPanel.tsx
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const AIPanel: React.FC = () => {
+    const theme = useTheme();
+    // 根据当前模式决定 bot 消息气泡的背景色
+    const botBubbleColor = theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300';
+
     const [messages, setMessages] = useState<{ sender: 'bot' | 'user'; text: string }[]>([
         { sender: 'bot', text: 'Hello! How can I help you today?' },
     ]);
@@ -21,9 +26,11 @@ const AIPanel: React.FC = () => {
     const handleClear = () => {
         setMessages([]);
     };
+
     const handleSamplePrompt = () => {
         setInput('Explain the merge sort algorithm.');
     };
+
     const handleNewChat = () => {
         setMessages([]);
         setInput('');
@@ -53,7 +60,7 @@ const AIPanel: React.FC = () => {
                                     maxWidth: '70%',
                                     p: 1,
                                     borderRadius: 1,
-                                    bgcolor: isUser ? 'primary.main' : 'grey.300',
+                                    bgcolor: isUser ? 'primary.main' : botBubbleColor,
                                     color: isUser ? 'primary.contrastText' : 'text.primary',
                                 }}
                             >
@@ -63,7 +70,7 @@ const AIPanel: React.FC = () => {
                     );
                 })}
             </Box>
-            {/* 快捷操作按钮：NEW CHAT 和 HINT */}
+            {/* 快捷操作按钮 */}
             <Box
                 sx={{
                     p: 1,
@@ -83,7 +90,7 @@ const AIPanel: React.FC = () => {
                     CLEAR
                 </Button>
             </Box>
-            {/* 输入区，始终固定在底部 */}
+            {/* 输入区 */}
             <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex' }}>
                 <TextField
                     fullWidth

@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import MobileWarning from './pages/MobileWarning';
 import OrientationGuard from './OrientationGuard';
 import './index.css';
+import Analysis from "./pages/Analysis";
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
@@ -18,6 +19,7 @@ root.render(
                     <Route path="/" element={<Practice />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/practice" element={<Practice />} />
+                    <Route path="/analysis" element={<Analysis />} />
                 </Routes>
             </OrientationGuard>
         </BrowserRouter>

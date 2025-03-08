@@ -14,7 +14,9 @@
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "latest",
     "@mui/material": "latest",
+    "@mui/x-charts": "^7.27.1",
     "react": "latest",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "latest",
     "react-router-dom": "^7.3.0",
     "react-split": "^2.0.14"

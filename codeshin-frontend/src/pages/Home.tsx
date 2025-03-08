@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, ThemeProvider, CssBaseline } from '@mui/material';
+import { Box, Button, Typography, ThemeProvider, CssBaseline, Paper } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
+
 import NavBar from '../components/NavBar';
 
 function Home() {
@@ -21,9 +22,8 @@ function Home() {
     });
 
     useEffect(() => {
-        // 这里可以添加从后端获取用户刷题信息的逻辑
-        setTotalProblemsSolved(42); // 示例数据
-        setUserLevel('Intermediate'); // 示例数据
+        setTotalProblemsSolved(42);
+        setUserLevel('Intermediate');
     }, []);
 
     const pages = ['Practice','Home',  'Analysis'];
@@ -46,25 +46,31 @@ function Home() {
                     justifyContent: 'center',
                     height: 'calc(100vh - 64px)',
                     textAlign: 'center',
+                    p: 3,
+                    backgroundColor: theme.palette.background.default,
                 }}
             >
-                <Typography variant="h4" gutterBottom>
-                    Welcome to CodeShin!
-                </Typography>
-                <Typography variant="h6" gutterBottom>
-                    You have solved {totalProblemsSolved} problems.
-                </Typography>
-                <Typography variant="h6" gutterBottom>
-                    Your current level: {userLevel}
-                </Typography>
-                <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-                    <Button variant="contained" color="primary" onClick={() => navigate('/practice')}>
-                        Start Practicing
-                    </Button>
-                    <Button variant="outlined" color="secondary" onClick={() => navigate('/analysis')}>
-                        View History
-                    </Button>
-                </Box>
+
+                    <Typography variant="h3" fontWeight={600} gutterBottom>
+                        Welcome to CodeShin!
+                    </Typography>
+                    <Typography variant="h5" color="text.secondary" gutterBottom>
+                        Enhance your coding skills with practice.
+                    </Typography>
+                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 500 }}>
+                        Problems solved: <strong>{totalProblemsSolved}</strong>
+                    </Typography>
+                    <Typography variant="h6" sx={{ mt: 1, fontWeight: 500 }}>
+                        Current Level: <strong>{userLevel}</strong>
+                    </Typography>
+                    <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+                        <Button variant="contained" color="primary" size="large" onClick={() => navigate('/practice')}>
+                            Practice
+                        </Button>
+                        <Button variant="outlined" color="primary" size="large" onClick={() => navigate('/analysis')}>
+                            Analysis
+                        </Button>
+                    </Box>
             </Box>
         </ThemeProvider>
     );

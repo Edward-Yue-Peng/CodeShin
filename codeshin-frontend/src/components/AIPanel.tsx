@@ -86,9 +86,6 @@ const AIPanel: React.FC = () => {
                 <Button variant="outlined" size="small" onClick={handleSamplePrompt}>
                     HINT
                 </Button>
-                <Button variant="outlined" size="small" onClick={handleClear}>
-                    CLEAR
-                </Button>
             </Box>
             {/* 输入区 */}
             <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex' }}>

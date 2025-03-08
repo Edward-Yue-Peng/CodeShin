@@ -1,7 +1,7 @@
 // src/index.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Practice from './pages/Practice';
 import Home from './pages/Home';
 import MobileWarning from './pages/MobileWarning';
@@ -12,7 +12,7 @@ import Analysis from "./pages/Analysis";
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
     <React.StrictMode>
-        <BrowserRouter>
+        <HashRouter>
             <OrientationGuard>
                 <Routes>
                     <Route path="/mobile" element={<MobileWarning />} />
@@ -22,6 +22,6 @@ root.render(
                     <Route path="/analysis" element={<Analysis />} />
                 </Routes>
             </OrientationGuard>
-        </BrowserRouter>
+        </HashRouter>
     </React.StrictMode>
 );

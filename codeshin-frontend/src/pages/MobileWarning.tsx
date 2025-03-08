@@ -15,11 +15,12 @@ const MobileWarning: React.FC = () => {
                 textAlign: 'center',
             }}
         >
+            <Typography variant="h2" gutterBottom>💻</Typography>
             <Typography variant="h4" gutterBottom>
-                Please Use a Desktop 💻
+                Please Use a Desktop
             </Typography>
             <Typography variant="body1">
-                This application is optimized for desktop use. Please switch to a device with a wider screen for the best experience.
+                CodeShin is optimized for desktop use. Please switch to a device with a wider screen for the best experience.
             </Typography>
         </Box>
     );

@@ -84,7 +84,7 @@ const NavBar: React.FC<NavBarProps> = ({
                     </Typography>
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
                         {pages.map((page) => {
-                            const path = page.toLowerCase() === 'practice' ? '/' : `/${page.toLowerCase()}`;
+                            const path = page.toLowerCase() === 'home' ? '/' : `/${page.toLowerCase()}`;
                             const location = useLocation();  // 获取当前路径
 
                             return (

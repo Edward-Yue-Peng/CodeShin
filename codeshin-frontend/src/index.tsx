@@ -16,7 +16,7 @@ root.render(
             <OrientationGuard>
                 <Routes>
                     <Route path="/mobile" element={<MobileWarning />} />
-                    <Route path="/" element={<Practice />} />
+                    <Route path="/" element={<Home />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/practice" element={<Practice />} />
                     <Route path="/analysis" element={<Analysis />} />

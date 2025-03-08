@@ -25,7 +25,6 @@ function Practice() {
         const handleKeyDown = (event: KeyboardEvent) => {
             if ((event.ctrlKey || event.metaKey) && event.key === "s") {
                 event.preventDefault();
-                // 原先的 alert 替换为调用自定义函数
                 handleShowSaveNotification();
             }
         };

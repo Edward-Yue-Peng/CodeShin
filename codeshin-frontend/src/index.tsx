@@ -8,7 +8,7 @@ import MobileWarning from './pages/MobileWarning';
 import OrientationGuard from './OrientationGuard';
 import './index.css';
 import Analysis from "./pages/Analysis";
-
+import LoginPage from "./pages/LoginPage"
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
     <React.StrictMode>
@@ -16,7 +16,7 @@ root.render(
             <OrientationGuard>
                 <Routes>
                     <Route path="/mobile" element={<MobileWarning />} />
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<LoginPage />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/practice" element={<Practice />} />
                     <Route path="/analysis" element={<Analysis />} />

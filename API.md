@@ -176,7 +176,7 @@ GET /api/user/1/last-ai-reply?prompt=为什么这里超出索引？
 
 ### POST /api/submit/recommend
 
-通过反馈，推荐下一步题目
+通过反馈和用户信息，推荐下一步题目
 
 **请求体**：
 ```json

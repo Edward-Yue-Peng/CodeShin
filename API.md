@@ -13,12 +13,12 @@
 ```json
 {
   "userId": 1,
-  "level": 1,
-  "totalPracticed": 54
+  "userlevel": 1,
+  "totalPracticed": [201,202]
 }
 ```
-- `level`：用户当前水平（1-3，分别为初级、中级、高级）
-- `totalPracticed`：用户已练习的题目数量
+- `userlevel`：用户当前水平（1-3，分别为初级、中级、高级）
+- `totalPracticed`：用户已练习的题目列表
 ### GET /api/user/:id/last-question
 
 获取用户上次正在做的题目的信息
@@ -194,14 +194,12 @@ GET /api/user/1/last-ai-reply?prompt=为什么这里超出索引？
 ```json
 {
   "recommendations"：questions
-   questions is a list, each element of the questions is a object with two attributes: index and topic.
+   //questions is a list, each element of the questions is a object with two attributes: index and topic.
 }
 ```
 - `recommendations`：推荐的题目列表
-例：
-questions[0].index=201 #题号
-questions[0].topic= "链表” #针对提升的知识点
-最值得推荐的题目将是questions列表的第一个，列表长度计划为1-3
+- 例：questions[0].index=201 #题号 questions[0].topic= "链表” #针对提升的知识点
+- 最值得推荐的题目将是questions列表的第一个，列表长度计划为1-3
 
 ## 4. AI 问答模块
 

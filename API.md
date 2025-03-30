@@ -191,14 +191,10 @@ GET /api/user/1/last-ai-reply?prompt=为什么这里超出索引？
 ```
 
 **响应**：
-```json
 {
-  "recommendations"：questions
-   //questions is a list, each element of the questions is a object with two attributes: index and topic.
-}
-```
-- `recommendations`：推荐的题目列表
-- 例：questions[0].index=201 #题号 questions[0].topic= "链表” #针对提升的知识点
+  "recommendations":[{"id":201,"relatedTopic": "链表"},{"id": 32,"relatedTopic": "字符串" }]
+- `recommendations`:推荐的题目列表
+- id为题号 relatedTopic为针对提升的知识点
 - 最值得推荐的题目将是questions列表的第一个，列表长度计划为1-3
 
 ## 4. AI 问答模块

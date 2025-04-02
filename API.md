@@ -14,7 +14,7 @@
 {
   "userId": 1,
   "userlevel": 1,
-  "totalPracticed": [201,202]
+  "totalPracticed": [201,202,203]
 }
 ```
 - `userlevel`：用户当前水平（1-3，分别为初级、中级、高级）

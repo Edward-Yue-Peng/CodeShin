@@ -13,12 +13,12 @@
 ```json
 {
   "userId": 1,
-  "level": 1,
-  "totalPracticed": 54
+  "userlevel": 1,
+  "totalPracticed": [201,202,203]
 }
 ```
-- `level`：用户当前水平（1-3，分别为初级、中级、高级）
-- `totalPracticed`：用户已练习的题目数量
+- `userlevel`：用户当前水平（1-3，分别为初级、中级、高级）
+- `totalPracticed`：用户已练习的题目列表
 ### GET /api/user/:id/last-question
 
 获取用户上次正在做的题目的信息

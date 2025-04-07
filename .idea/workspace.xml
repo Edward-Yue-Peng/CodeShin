@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="更新Markdown">
-      <change beforePath="$PROJECT_DIR$/codeshin-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/pages/LoginPage.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="合并杨师的后端" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -108,7 +105,7 @@
       <workItem from="1742953468637" duration="3000" />
       <workItem from="1743092191264" duration="606000" />
       <workItem from="1743181577011" duration="9000" />
-      <workItem from="1744030180185" duration="5397000" />
+      <workItem from="1744030180185" duration="5756000" />
     </task>
     <task id="LOCAL-00001" summary="initialize Vite project with React and Material UI setup">
       <option name="closed" value="true" />
@@ -230,7 +227,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742573078122</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="合并杨师的后端">
+      <option name="closed" value="true" />
+      <created>1744038133835</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1744038133835</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -261,6 +266,7 @@
     <MESSAGE value="add Pyodide integration for Python code execution in CodeEditor; refactor layout and state management" />
     <MESSAGE value="add LoginPage component and update routing; refactor NavBar for consistent path handling" />
     <MESSAGE value="更新Markdown" />
-    <option name="LAST_COMMIT_MESSAGE" value="更新Markdown" />
+    <MESSAGE value="合并杨师的后端" />
+    <option name="LAST_COMMIT_MESSAGE" value="合并杨师的后端" />
   </component>
 </project>

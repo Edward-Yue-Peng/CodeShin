@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="更新Markdown">
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/pages/LoginPage.tsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
+        <option value="JSX File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Edward-Yue-Peng&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Edward-Yue-Peng/CodeShin.git&quot;,
+    &quot;accountId&quot;: &quot;f76a4992-6a3f-4494-b7c7-64f8778a06a8&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2tytGEYGd5cwSrFiRMSKgABHCmw" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "JavaScript Debug.localhost:5173.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "ts.external.directory.path": "/Users/pengyue/Documents/GitHub/CodeShin/codeshin-frontend/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/codeshin-frontend/src/pages" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="localhost:5173" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:5173/">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.localhost:5173" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-WS-243.26053.12" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="" />
+      <created>1723900712829</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1723900712829</updated>
+      <workItem from="1741336045798" duration="2699000" />
+      <workItem from="1741338765699" duration="52000" />
+      <workItem from="1741338983659" duration="25278000" />
+      <workItem from="1741416799126" duration="298000" />
+      <workItem from="1741420839328" duration="3392000" />
+      <workItem from="1741424362137" duration="9134000" />
+      <workItem from="1741693354579" duration="1439000" />
+      <workItem from="1742567483473" duration="3261000" />
+      <workItem from="1742719039456" duration="4000" />
+      <workItem from="1742953468637" duration="3000" />
+      <workItem from="1743092191264" duration="606000" />
+      <workItem from="1743181577011" duration="9000" />
+      <workItem from="1744030180185" duration="5397000" />
+    </task>
+    <task id="LOCAL-00001" summary="initialize Vite project with React and Material UI setup">
+      <option name="closed" value="true" />
+      <created>1741341098479</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1741341098479</updated>
+    </task>
+    <task id="LOCAL-00002" summary="refactor App layout and enhance AI panel functionality">
+      <option name="closed" value="true" />
+      <created>1741361391526</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1741361391526</updated>
+    </task>
+    <task id="LOCAL-00003" summary="restructure, complete basic features">
+      <option name="closed" value="true" />
+      <created>1741368845476</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1741368845476</updated>
+    </task>
+    <task id="LOCAL-00004" summary="dark mode">
+      <option name="closed" value="true" />
+      <created>1741411082571</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1741411082571</updated>
+    </task>
+    <task id="LOCAL-00005" summary="enhance AIPanel layout, improve Description component, and add global CSS">
+      <option name="closed" value="true" />
+      <created>1741413348221</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1741413348221</updated>
+    </task>
+    <task id="LOCAL-00006" summary="enhance AIPanel layout, improve Description component, and add global CSS">
+      <option name="closed" value="true" />
+      <created>1741413425939</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1741413425939</updated>
+    </task>
+    <task id="LOCAL-00007" summary="add feedback dialog and navigation; restructure components and update routing">
+      <option name="closed" value="true" />
+      <created>1741416550975</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1741416550975</updated>
+    </task>
+    <task id="LOCAL-00008" summary="refactor NavBar component to optimize navigation; prevent unnecessary route changes">
+      <option name="closed" value="true" />
+      <created>1741424553982</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1741424553982</updated>
+    </task>
+    <task id="LOCAL-00009" summary="add auto-save notification with Snackbar; handle Ctrl+S/Cmd+S key events">
+      <option name="closed" value="true" />
+      <created>1741424975944</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1741424975944</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Home demo">
+      <option name="closed" value="true" />
+      <created>1741425970408</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1741425970408</updated>
+    </task>
+    <task id="LOCAL-00011" summary="add Analysis page with performance overview chart; refactor Home and AIPanel components">
+      <option name="closed" value="true" />
+      <created>1741427825771</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1741427825771</updated>
+    </task>
+    <task id="LOCAL-00012" summary="add Analysis page with performance overview chart; refactor Home and AIPanel components">
+      <option name="closed" value="true" />
+      <created>1741429942398</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1741429942398</updated>
+    </task>
+    <task id="LOCAL-00013" summary="add Pyodide integration for Python code execution in CodeEditor; refactor layout and state management">
+      <option name="closed" value="true" />
+      <created>1741440878607</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1741440878607</updated>
+    </task>
+    <task id="LOCAL-00014" summary="add LoginPage component and update routing; refactor NavBar for consistent path handling">
+      <option name="closed" value="true" />
+      <created>1741694740271</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1741694740271</updated>
+    </task>
+    <task id="LOCAL-00015" summary="更新Markdown">
+      <option name="closed" value="true" />
+      <created>1742573078122</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1742573078122</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="initialize Vite project with React and Material UI setup" />
+    <MESSAGE value="refactor App layout and enhance AI panel functionality" />
+    <MESSAGE value="restructure, complete basic features" />
+    <MESSAGE value="dark mode" />
+    <MESSAGE value="enhance AIPanel layout, improve Description component, and add global CSS" />
+    <MESSAGE value="add feedback dialog and navigation; restructure components and update routing" />
+    <MESSAGE value="refactor NavBar component to optimize navigation; prevent unnecessary route changes" />
+    <MESSAGE value="add auto-save notification with Snackbar; handle Ctrl+S/Cmd+S key events" />
+    <MESSAGE value="Home demo" />
+    <MESSAGE value="add Analysis page with performance overview chart; refactor Home and AIPanel components" />
+    <MESSAGE value="add Pyodide integration for Python code execution in CodeEditor; refactor layout and state management" />
+    <MESSAGE value="add LoginPage component and update routing; refactor NavBar for consistent path handling" />
+    <MESSAGE value="更新Markdown" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新Markdown" />
+  </component>
+</project>

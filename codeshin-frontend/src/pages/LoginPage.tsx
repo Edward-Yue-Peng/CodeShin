@@ -42,13 +42,33 @@ function LoginPage() {
         };
     }, []);
 
-    const handleSubmit = (e: { preventDefault: () => void; }) => {
+    const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
-        if (username && password) {
-            // 成功登录后直接跳转到 /home
-            navigate('/home');
-        } else {
+        if (!username || !password) {
             alert('请输入用户名和密码！');
+            return;
+        }
+
+        const response = await fetch('http://localhost:8000/api/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+        });
+        response.status;
+        const text = await response.text(); // 先当字符串读出来看看
+        console.log('Raw response text:', text);
+        try {
+            const data = JSON.parse(text);
+            if (response.status !== 200) {
+                alert(data.error);
+            }
+            else {
+                    navigate('/home');
+                }
+        } catch (err) {
+            alert('网络错误，请稍后再试\n' + err + '\n' + text); // 展示报错和原始内容
         }
     };
 
@@ -59,9 +79,7 @@ function LoginPage() {
 
             <div className="login-container">
                 <div className="logo">
-                    <h1>
-                        CODESHIN
-                    </h1>
+                    <h1>CODESHIN</h1>
                     <span>源 神</span>
                 </div>
 
@@ -146,7 +164,7 @@ function LoginPage() {
 
                 <div className="footer">
                     <p>
-                        还没有账号? <Link to={''}>立即注册</Link>
+                        还没有账号? <Link to="/register">立即注册</Link>
                     </p>
                 </div>
             </div>

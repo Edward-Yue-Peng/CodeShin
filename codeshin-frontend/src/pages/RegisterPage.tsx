@@ -1,38 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { TextField, Button } from '@mui/material';
 import './LoginPage.css';
 
-function LoginPage() {
+function RegisterPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
-    // 创建背景粒子效果
+    // 创建背景粒子效果，与 LoginPage 保持一致
     useEffect(() => {
         const particles = document.getElementById('particles');
         for (let i = 0; i < 50; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
-
-            // 随机大小和位置
             const size = Math.random() * 5 + 1;
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             particle.style.left = `${Math.random() * 100}%`;
             particle.style.top = `${Math.random() * 100}%`;
-
-            // 随机动画延迟和持续时间
             const animationDuration = Math.random() * 20 + 10;
             const animationDelay = Math.random() * 10;
             particle.style.animationDuration = `${animationDuration}s`;
             particle.style.animationDelay = `${animationDelay}s`;
-
             // @ts-ignore
             particles.appendChild(particle);
         }
-
-        // 清理函数
         return () => {
             // @ts-ignore
             while (particles.firstChild) {
@@ -49,30 +42,27 @@ function LoginPage() {
             return;
         }
 
-        const response = await fetch('http://localhost:8000/api/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
-        const text = await response.text();
-        console.log('Raw response text:', text);
         try {
+            const response = await fetch('http://localhost:8000/api/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+            const text = await response.text();
+            console.log('Raw response text:', text);
             const data = JSON.parse(text);
-            if (response.status !== 200) {
-                alert(data.error);
+
+            if (response.status !== 201) {
+                alert(data.error || '注册失败，请检查输入信息');
             } else {
-                navigate('/home');
+                alert('注册成功，请前往登录！');
+                navigate('/login');
             }
         } catch (err) {
-            alert('网络错误，请稍后再试\n' + err + '\n' + text);
+            alert('网络错误，请稍后再试\n' + err);
         }
-    };
-
-    // 点击“立即注册”时重定向到 /register
-    const redirectToRegister = () => {
-        navigate('/register');
     };
 
     return (
@@ -82,8 +72,7 @@ function LoginPage() {
 
             <div className="login-container">
                 <div className="logo">
-                    <h1>CODESHIN</h1>
-                    <span>源 神</span>
+                    <h1>注册账号</h1>
                 </div>
 
                 <form onSubmit={handleSubmit}>
@@ -161,19 +150,13 @@ function LoginPage() {
                             fontWeight: 'bold',
                         }}
                     >
-                        登 录
+                        注 册
                     </Button>
                 </form>
 
                 <div className="footer">
                     <p>
-                        还没有账号?{' '}
-                        <span
-                            style={{ color: '#51a2ff', cursor: 'pointer' }}
-                            onClick={redirectToRegister}
-                        >
-                            立即注册
-                        </span>
+                        已有账号? <Link to="/login">立即登录</Link>
                     </p>
                 </div>
             </div>
@@ -181,4 +164,4 @@ function LoginPage() {
     );
 }
 
-export default LoginPage;
+export default RegisterPage;

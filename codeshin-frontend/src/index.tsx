@@ -9,6 +9,7 @@ import OrientationGuard from './OrientationGuard';
 import './index.css';
 import Analysis from "./pages/Analysis";
 import LoginPage from "./pages/LoginPage"
+import RegisterPage from "./pages/RegisterPage";
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
     <React.StrictMode>
@@ -17,9 +18,11 @@ root.render(
                 <Routes>
                     <Route path="/mobile" element={<MobileWarning />} />
                     <Route path="/" element={<LoginPage />} />
+                    <Route path="/login" element={<LoginPage />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/practice" element={<Practice />} />
                     <Route path="/analysis" element={<Analysis />} />
+                    <Route path="/register" element={<RegisterPage />} />
                 </Routes>
             </OrientationGuard>
         </HashRouter>

@@ -194,8 +194,7 @@
                 "dislikes": 321,
                 "rating": 4.2,
                 "similar_questions": "Two Sum, Four Sum"
-            },
-            // ... 更多题目
+            }
         ]
         ```
 - **失败**:

@@ -23,12 +23,15 @@
     "react": "latest",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "latest",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.3.0",
-    "react-split": "^2.0.14"
+    "react-split": "^2.0.14",
+    "react-syntax-highlighter": "^15.6.1"
   },
   "devDependencies": {
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "latest",
     "gh-pages": "^6.3.0",
     "typescript": "latest",

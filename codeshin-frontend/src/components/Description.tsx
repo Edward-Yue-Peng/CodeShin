@@ -1,8 +1,132 @@
-import React from 'react';
-import { Box, Typography, Paper, useTheme } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Paper, Divider, useTheme } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const Description: React.FC = () => {
+interface ProblemData {
+    id: number;
+    title: string;
+    description: string; // Markdown formatted problem description
+    difficulty: string;
+    is_premium: boolean;
+    acceptance_rate: number;
+    frequency: number;
+    url: string;
+    discuss_count: number;
+    accepted: number;
+    submissions: number;
+    related_topics: string[];
+    likes: number;
+    dislikes: number;
+    rating: number;
+    similar_questions: string;
+}
+
+const Description = () => {
     const theme = useTheme();
+    const [problem, setProblem] = useState<ProblemData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        async function fetchProblem() {
+            try {
+                const response = await fetch('http://localhost:8000/api/problems/?id=5');
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(errText);
+                }
+                const data = await response.json();
+                setProblem(data);
+            } catch (err: any) {
+                setError(err.message || 'Failed to fetch problem information');
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchProblem();
+    }, []);
+
+    if (loading) {
+        return (
+            <Paper
+                elevation={3}
+                sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    backgroundColor: theme.palette.background.paper,
+                    p: 2,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <Typography variant="h6">Loading...</Typography>
+            </Paper>
+        );
+    }
+
+    if (error) {
+        return (
+            <Paper
+                elevation={3}
+                sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    backgroundColor: theme.palette.background.paper,
+                    p: 2,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <Typography variant="h6" color="error">
+                    {error}
+                </Typography>
+            </Paper>
+        );
+    }
+
+    if (!problem) {
+        return (
+            <Paper
+                elevation={3}
+                sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    backgroundColor: theme.palette.background.paper,
+                    p: 2,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <Typography variant="h6" color="error">
+                    No problem information available
+                </Typography>
+            </Paper>
+        );
+    }
+
+    // Custom Markdown code renderer
+    const renderers = {
+        code({ node, inline, className, children, ...props }: any) {
+            const match = /language-(\w+)/.exec(className || '');
+            return !inline && match ? (
+                <SyntaxHighlighter style={materialDark} language={match[1]} PreTag="div" {...props}>
+                    {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+            ) : (
+                <code className={className} {...props}>
+                    {children}
+                </code>
+            );
+        },
+    };
 
     return (
         <Paper
@@ -11,60 +135,62 @@ const Description: React.FC = () => {
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                // borderRadius: 0,
                 overflow: 'hidden',
                 backgroundColor: theme.palette.background.paper,
                 p: 2
             }}
         >
-            {/* Problem Title 下面这个部分应该做成可变的！*/}
             <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                {/* Problem Title and Basic Info */}
                 <Typography variant="h5" fontWeight="bold" gutterBottom>
-                    Merge Sort Algorithm
+                    {problem.title}
                 </Typography>
+                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                    {problem.difficulty}
+                </Typography>
+                <Divider sx={{ my: 2 }} />
 
-                {/* Problem Introduction */}
-                <Typography variant="body1" color="text.secondary" component="p" sx={{ lineHeight: 1.8 }}>
-                    Merge Sort is a <strong>divide-and-conquer</strong> algorithm that recursively splits an array into two halves,
-                    sorts each half, and then merges them back together in a sorted order.
-                </Typography>
-
-                {/* Algorithm Steps */}
-                <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ lineHeight: 1.8 }}>
-                    Steps:
-                </Typography>
-                <Typography variant="body2" color="text.secondary" component="p" sx={{ lineHeight: 1.8 }}>
-                    1️⃣ <strong>Divide</strong>: If the array length is greater than 1, split it into two halves.<br/>
-                    2️⃣ <strong>Recursively Sort</strong>: Apply merge sort on both halves separately.<br/>
-                    3️⃣ <strong>Merge</strong>: Combine the two sorted halves back into a single sorted array.
-                </Typography>
+                {/* Markdown Rendered Problem Description */}
+                <Box sx={{ mb: 2 }}>
+                    <ReactMarkdown components={renderers}>
+                        {problem.description}
+                    </ReactMarkdown>
                 </Box>
-               {/* Time Complexity */}
-                <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ lineHeight: 1.8 }}>
-                        Time Complexity:
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" component="p" sx={{ lineHeight: 1.8 }}>
-                        Merge Sort has a time complexity of <strong>O(n log n)</strong>, making it efficient for large datasets.
-                        It maintains this performance even in the <strong>worst-case scenario</strong>.
-                    </Typography>
+                <Divider sx={{ my: 2 }} />
+
+                {/* Statistics Display */}
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+                    <Typography variant="body2">Acceptance Rate: {problem.acceptance_rate}%</Typography>
+                    <Typography variant="body2">Submissions: {problem.submissions}</Typography>
+                    <Typography variant="body2">Accepted: {problem.accepted}</Typography>
+                    <Typography variant="body2">Discussion Count: {problem.discuss_count}</Typography>
+                    <Typography variant="body2">Likes: {problem.likes}</Typography>
+                    <Typography variant="body2">Dislikes: {problem.dislikes}</Typography>
+                    <Typography variant="body2">Rating: {problem.rating}</Typography>
+                    <Typography variant="body2">Frequency: {problem.frequency}</Typography>
                 </Box>
 
-                {/* Example */}
-                <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle1" fontWeight="bold" color="primary" gutterBottom sx={{ lineHeight: 1.8 }}>
-                    Example:
-                </Typography>
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, backgroundColor: theme.palette.action.hover }}>
-                    <Typography variant="body2" color="text.secondary">
-                        <strong>Input:</strong> [38, 27, 43, 3, 9, 82, 10]
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        <strong>Output:</strong> [3, 9, 10, 27, 38, 43, 82]
-                    </Typography>
-                </Paper>
-                </Box>
+                {/* Related Topics */}
+                {problem.related_topics && problem.related_topics.length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Related Topics:
+                        </Typography>
+                        <Typography variant="body2">
+                            {problem.related_topics.join(', ')}
+                        </Typography>
+                    </Box>
+                )}
+
+                {/* Similar Questions */}
+                {problem.similar_questions && (
+                    <Box sx={{ mt: 2 }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Similar Questions:
+                        </Typography>
+                        <Typography variant="body2">{problem.similar_questions}</Typography>
+                    </Box>
+                )}
             </Box>
         </Paper>
     );

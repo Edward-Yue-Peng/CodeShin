@@ -4,7 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="合并杨师的后端" />
+    <list default="true" id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="Update workspace.xml to reflect backend merge and adjust task duration">
+      <change afterPath="$PROJECT_DIR$/codeshin-frontend/src/pages/RegisterPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API.md" beforeDir="false" afterPath="$PROJECT_DIR$/API.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/components/CodeEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/components/CodeEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/components/Description.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/components/Description.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/pages/LoginPage.tsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,8 +24,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="TypeScript File" />
-        <option value="TypeScript JSX File" />
         <option value="JSX File" />
+        <option value="TypeScript JSX File" />
       </list>
     </option>
   </component>
@@ -31,7 +41,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Edward-Yue-Peng/CodeShin.git&quot;,
-    &quot;accountId&quot;: &quot;f76a4992-6a3f-4494-b7c7-64f8778a06a8&quot;
+    &quot;accountId&quot;: &quot;acb4a267-b8b1-4e1a-a136-4550f6a6e021&quot;
   }
 }</component>
   <component name="ProblemsViewState">
@@ -45,23 +55,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "JavaScript Debug.localhost:5173.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "ts.external.directory.path": "/Users/pengyue/Documents/GitHub/CodeShin/codeshin-frontend/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;JavaScript Debug.localhost:5173.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/pengyue/Documents/GitHub/CodeShin&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/pengyue/Documents/GitHub/CodeShin/codeshin-frontend/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/codeshin-frontend/src/pages" />
@@ -81,7 +92,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-WS-243.26053.12" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
+        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
       </set>
     </attachedChunks>
   </component>
@@ -106,6 +118,7 @@
       <workItem from="1743092191264" duration="606000" />
       <workItem from="1743181577011" duration="9000" />
       <workItem from="1744030180185" duration="5756000" />
+      <workItem from="1744038357130" duration="164000" />
     </task>
     <task id="LOCAL-00001" summary="initialize Vite project with React and Material UI setup">
       <option name="closed" value="true" />
@@ -267,6 +280,7 @@
     <MESSAGE value="add LoginPage component and update routing; refactor NavBar for consistent path handling" />
     <MESSAGE value="更新Markdown" />
     <MESSAGE value="合并杨师的后端" />
-    <option name="LAST_COMMIT_MESSAGE" value="合并杨师的后端" />
+    <MESSAGE value="Update workspace.xml to reflect backend merge and adjust task duration" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update workspace.xml to reflect backend merge and adjust task duration" />
   </component>
 </project>

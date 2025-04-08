@@ -12,7 +12,8 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions, Typography
+    DialogActions,
+    Typography
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import NavBar from '../components/NavBar';
@@ -30,6 +31,7 @@ function Practice() {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [recommendedProblems, setRecommendedProblems] = useState<number[]>([]);
     const [openRecommendations, setOpenRecommendations] = useState(false);
+    const [openFeedback, setOpenFeedback] = useState(false);
 
     // 初始获取用户进度、代码和题目
     const fetchData = async () => {
@@ -58,7 +60,6 @@ function Practice() {
         }
     }, [user]);
 
-    // 父组件统一保存逻辑
     const handleSave = async (currentCode: string) => {
         try {
             const response = await fetch('http://localhost:8000/api/autosave_code/', {
@@ -80,35 +81,7 @@ function Practice() {
         }
     };
 
-    // 统一提交代码逻辑（先提交再保存，同时弹出反馈）
-    const handleSubmit = async (currentCode: string) => {
-        try {
-            const response = await fetch('http://localhost:8000/api/submit_code/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: user?.userId,
-                    problem_id: problemID,
-                    solution_code: currentCode,
-                    is_passed: true,
-                    submission_status: 'Accepted',
-                }),
-            });
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(errText);
-            }
-            const data = await response.json();
-            alert(data.message || 'Code submitted successfully!');
-            // 保存代码后显示反馈，此处可以进行反馈处理
-            await handleSave(currentCode);
-            // 此处可以设置反馈对话框的显示状态，如 setOpenFeedback(true)（自行设计）
-        } catch (error: any) {
-            alert('Submit failed: ' + error.message);
-        }
-    };
-
-    // 统一获取推荐题目列表，并更新题目（供下一题选择）
+// 统一获取推荐题目列表，并更新题目（供下一题选择）
     const handleNextProblem = async () => {
         try {
             const response = await fetch(`http://localhost:8000/api/get_recommendations/?user_id=${user?.userId}`);
@@ -124,7 +97,7 @@ function Practice() {
         }
     };
 
-    // 用户在推荐对话框中选择题目后，更新题目和代码（同时让 Description 重新获取题目信息）
+    // 用户在推荐对话框中选择题目后，更新题目和代码
     const handleRecommendationSelect = async (selectedId: number) => {
         try {
             const response = await fetch(`http://localhost:8000/api/problems/?id=${selectedId}`);
@@ -136,6 +109,7 @@ function Practice() {
             setProblemID(selectedId);
             setCode(data.default_code || '');
             setOpenRecommendations(false);
+            setOpenFeedback(false);
         } catch (error: any) {
             alert('Failed to load the selected problem: ' + error.message);
         }
@@ -145,7 +119,13 @@ function Practice() {
         setOpenSnackbar(false);
     };
 
-    // 其它布局和状态，省略 Split 和 AI panel 相关代码……
+    // 新增：当 CodeEditor 中点击 TaskAltIcon 按钮时调用该回调
+    const handleTaskAltClick = () => {
+        console.log("TaskAltIcon clicked in CodeEditor - handled in Practice!");
+        // 这里可以继续增加其它逻辑
+    };
+
+    // 布局相关状态
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
     const [aiVisible, setAiVisible] = useState(true);
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
@@ -156,16 +136,17 @@ function Practice() {
             mode: effectiveMode,
         },
     });
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <NavBar
-                // 将控制 AI panel、颜色模式等通过 props 传给 NavBar
                 onToggleAIPanel={() => setAiVisible((prev) => !prev)}
                 onChangeColorMode={setColorMode}
                 pages={pages}
                 currentMode={colorMode}
-                username={user?.username}/>
+                username={user?.username}
+            />
             <Box
                 sx={{
                     display: 'flex',
@@ -205,11 +186,9 @@ function Practice() {
                         <Suspense fallback={<div>Loading Code Editor...</div>}>
                             <CodeEditor
                                 autoSaveCode={code}
-                                problemID={problemID}
                                 onCodeChange={setCode}
                                 onSave={handleSave}
-                                onSubmit={handleSubmit}
-                                onNextProblem={handleNextProblem}
+                                onTaskAltClick={handleTaskAltClick} // 将回调传递给 CodeEditor
                             />
                         </Suspense>
                     </Box>
@@ -238,42 +217,72 @@ function Practice() {
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
                 <Alert onClose={handleCloseSnackbar} severity="info" icon={<SaveIcon fontSize="inherit" />}>
-                    Auto-saved
+                    Saved
                 </Alert>
             </Snackbar>
 
-            {/* 推荐题目选择对话框 */}
-            {/* 这里展示推荐题目列表，用户选择题目后调用 handleRecommendationSelect */}
-            {/* 你可以根据项目 UI 要求进一步调整 */}
-            {openRecommendations && (
-                <Dialog
-                    open={openRecommendations}
-                    onClose={() => setOpenRecommendations(false)}
-                    fullWidth
-                    maxWidth="sm"
-                >
-                    <DialogTitle>Select a Recommended Problem</DialogTitle>
-                    <DialogContent>
-                        {recommendedProblems && recommendedProblems.length > 0 ? (
-                            recommendedProblems.map((pid) => (
-                                <Button
-                                    key={pid}
-                                    onClick={() => handleRecommendationSelect(pid)}
-                                    fullWidth
-                                    sx={{ my: 1 }}
-                                >
-                                    Problem {pid}
-                                </Button>
-                            ))
-                        ) : (
-                            <Typography>No recommendations available.</Typography>
-                        )}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenRecommendations(false)}>Cancel</Button>
-                    </DialogActions>
-                </Dialog>
-            )}
+            {/* 反馈对话框 */}
+            <Dialog
+                open={openFeedback}
+                onClose={() => setOpenFeedback(false)}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>
+                    Merge Sort Feedback <span role="img" aria-label="feedback">💡</span>
+                </DialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="body1" color="text.secondary" gutterBottom>
+                        Overall, your merge sort implementation looks solid!
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        <strong>Strengths:</strong> Your code is well-structured and correctly implements merge sort.
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        <strong>Areas for Improvement:</strong> Consider optimizing the merge process for large datasets.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        variant="outlined"
+                        onClick={async () => {
+                            await handleNextProblem();
+                            setOpenFeedback(false);
+                        }}
+                    >
+                        Next Problem
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* 推荐题目选择弹窗 */}
+            <Dialog
+                open={openRecommendations}
+                onClose={() => setOpenRecommendations(false)}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>Select a Recommended Problem</DialogTitle>
+                <DialogContent>
+                    {recommendedProblems && recommendedProblems.length > 0 ? (
+                        recommendedProblems.map((pid) => (
+                            <Button
+                                key={pid}
+                                onClick={() => handleRecommendationSelect(pid)}
+                                fullWidth
+                                sx={{ my: 1 }}
+                            >
+                                Problem {pid}
+                            </Button>
+                        ))
+                    ) : (
+                        <Typography>No recommendations available.</Typography>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenRecommendations(false)}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
         </ThemeProvider>
     );
 }

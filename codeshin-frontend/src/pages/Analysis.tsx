@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import { Box, Typography, ThemeProvider, CssBaseline, Paper, List, ListItem, ListItemText, Grid } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { BarChart } from '@mui/x-charts/BarChart';
 import NavBar from '../components/NavBar';
+import {UserContext} from "../context/UserContext";
 
 function Analysis() {
     const [historyData, setHistoryData] = useState([
@@ -16,7 +17,7 @@ function Analysis() {
     ]);
 
     const [selectedData, setSelectedData] = useState(historyData[0]);
-
+    const { user } = useContext(UserContext);
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const effectiveMode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
@@ -38,6 +39,7 @@ function Analysis() {
                 pages={pages}
                 currentMode={colorMode}
                 onChangeColorMode={setColorMode}
+                username={user?.username}
             />
             <Box sx={{ p: 3, display: 'flex', flexDirection: 'row', gap: 3 }}>
                 {/* Left: History List */}

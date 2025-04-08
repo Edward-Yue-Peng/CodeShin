@@ -1,45 +1,37 @@
-// src/Practice.tsx
-
-import React, {useState, useRef, lazy, Suspense, useEffect} from 'react';
+import React, { useState, useRef, lazy, Suspense, useEffect, useContext } from 'react';
 import Box from '@mui/material/Box';
 import Split from 'react-split';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
-
 import NavBar from '../components/NavBar';
 import Description from '../components/Description';
-
-// === 新增 import ===
 import { Snackbar, Alert } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import { UserContext } from '../context/UserContext';
 
 const CodeEditor = lazy(() => import('../components/CodeEditor'));
 const AIPanel = lazy(() => import('../components/AIPanel'));
 
 function Practice() {
-    // 新增：Snackbar 的开关状态
+    // Snackbar 状态
     const [openSnackbar, setOpenSnackbar] = useState(false);
 
-    // 当按下 Ctrl+S 或 Cmd+S 时，弹出自定义保存提示
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
                 event.preventDefault();
                 handleShowSaveNotification();
             }
         };
-        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener('keydown', handleKeyDown);
         return () => {
-            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
 
-    // 新增：打开 Snackbar 的函数
     const handleShowSaveNotification = () => {
         setOpenSnackbar(true);
     };
-
-    // 新增：关闭 Snackbar 的函数
     const handleCloseSnackbar = () => {
         setOpenSnackbar(false);
     };
@@ -82,6 +74,8 @@ function Practice() {
 
     const pages = ['Practice', 'Home', 'Analysis'];
 
+    const { user } = useContext(UserContext);
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
@@ -91,6 +85,7 @@ function Practice() {
                 pages={pages}
                 currentMode={colorMode}
                 onChangeColorMode={setColorMode}
+                username={user?.username}
             />
             <Box
                 ref={containerRef}
@@ -110,7 +105,7 @@ function Practice() {
                     onDragEnd={(newSizes) => setSplitSizes(newSizes)}
                     style={{ display: 'flex', width: '100%', flexGrow: 1, height: '100%', minHeight: 0 }}
                 >
-                    {/* Left Pane */}
+                    {/* 左侧：题目信息 */}
                     <Box
                         sx={{
                             borderRight: '1px solid',
@@ -122,7 +117,7 @@ function Practice() {
                         <Description />
                     </Box>
 
-                    {/* Middle Pane */}
+                    {/* 中间：代码编辑器 */}
                     <Box
                         sx={{
                             borderRight: '1px solid',
@@ -136,7 +131,7 @@ function Practice() {
                         </Suspense>
                     </Box>
 
-                    {/* Right Pane */}
+                    {/* 右侧：AI 面板 */}
                     {aiVisible && (
                         <Box
                             sx={{
@@ -153,18 +148,13 @@ function Practice() {
                 </Split>
             </Box>
 
-            {/* Snackbar + Alert：3秒后自动关闭，右上角显示 */}
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={3000}
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                <Alert
-                    onClose={handleCloseSnackbar}
-                    severity="info"
-                    icon={<SaveIcon fontSize="inherit" />}
-                >
+                <Alert onClose={handleCloseSnackbar} severity="info" icon={<SaveIcon fontSize="inherit" />}>
                     Auto-saved
                 </Alert>
             </Snackbar>

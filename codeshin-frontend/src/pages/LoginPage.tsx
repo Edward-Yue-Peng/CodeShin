@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button } from '@mui/material';
 import './LoginPage.css';
+
+// 引入 UserContext
+import { UserContext } from '../context/UserContext';
 
 function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const { setUser } = useContext(UserContext);
 
     // 创建背景粒子效果
     useEffect(() => {
@@ -28,16 +32,17 @@ function LoginPage() {
             particle.style.animationDuration = `${animationDuration}s`;
             particle.style.animationDelay = `${animationDelay}s`;
 
-            // @ts-ignore
-            particles.appendChild(particle);
+            if (particles) {
+                particles.appendChild(particle);
+            }
         }
 
         // 清理函数
         return () => {
-            // @ts-ignore
-            while (particles.firstChild) {
-                // @ts-ignore
-                particles.removeChild(particles.firstChild);
+            if (particles) {
+                while (particles.firstChild) {
+                    particles.removeChild(particles.firstChild);
+                }
             }
         };
     }, []);
@@ -49,24 +54,31 @@ function LoginPage() {
             return;
         }
 
-        const response = await fetch('http://localhost:8000/api/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
-        const text = await response.text();
-        console.log('Raw response text:', text);
         try {
+            const response = await fetch('http://localhost:8000/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const text = await response.text();
+            console.log('Raw response text:', text);
+            // 尝试解析 JSON 返回的数据
             const data = JSON.parse(text);
-            if (response.status !== 200) {
+            if (!response.ok) {
                 alert(data.error);
-            } else {
-                navigate('/home');
+                return;
             }
+            // 登录成功后，保存用户信息到全局状态
+            setUser({
+                userId: data.userid,
+                username: username,
+            });
+            navigate('/home');
         } catch (err) {
-            alert('网络错误，请稍后再试\n' + err + '\n' + text);
+            alert('网络错误，请稍后再试\n' + err);
         }
     };
 

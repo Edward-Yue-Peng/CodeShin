@@ -69,7 +69,8 @@
     - 响应体:
         ```json
         {
-            "message": "Login successful"
+            "message": "Login successful",
+            "userid": 1
         }
         ```
 - **失败**:

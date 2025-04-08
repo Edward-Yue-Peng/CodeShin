@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     Box,
     IconButton,
@@ -16,26 +16,24 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import SaveIcon from '@mui/icons-material/Save';
 import { useTheme } from '@mui/material/styles';
 import Split from 'react-split';
+import { UserContext } from '../context/UserContext';
 
 const CodeEditor: React.FC = () => {
     const theme = useTheme();
     const monacoTheme = theme.palette.mode === 'dark' ? 'vs-dark' : 'vs-light';
 
-    // 假设当前用户 ID 固定为 1
-    const userId = 1;
+    // 从 context 中获取当前用户
+    const { user } = useContext(UserContext);
+    const userId = user ? user.userId : 0;
 
-    // 状态：代码内容，初始为空
+    // 代码内容状态及其它状态
     const [code, setCode] = useState('');
-    // 状态：终端输出和显示开关
     const [terminalOutput, setTerminalOutput] = useState('');
     const [showTerminal, setShowTerminal] = useState(false);
-    // 当前题目 id，从用户上次保存的记录中获取
     const [problemId, setProblemId] = useState(0);
-    // 状态：Pyodide 实例及加载状态
     const [pyodide, setPyodide] = useState<any>(null);
     const [loadingPyodide, setLoadingPyodide] = useState(true);
 
-    // 加载 Pyodide（确保在 index.html 引入 pyodide.js）
     useEffect(() => {
         const loadPyodideAndPackages = async () => {
             setLoadingPyodide(true);
@@ -51,8 +49,9 @@ const CodeEditor: React.FC = () => {
         loadPyodideAndPackages();
     }, []);
 
-    // 获取用户上次保存的代码和当前题目id
+    // 获取用户上次保存的代码与题目进度
     useEffect(() => {
+        if (userId === 0) return;
         async function fetchLastProgress() {
             try {
                 const response = await fetch(`http://localhost:8000/api/get_progress_and_code/?user_id=${userId}`);
@@ -71,9 +70,8 @@ const CodeEditor: React.FC = () => {
         fetchLastProgress();
     }, [userId]);
 
-    // 运行代码并显示终端结果
+    // 运行代码逻辑
     const handleRunCode = async () => {
-        console.log('handleRunCode called');
         if (loadingPyodide) {
             setTerminalOutput('Pyodide is loading, please wait...');
             setShowTerminal(true);
@@ -86,9 +84,9 @@ const CodeEditor: React.FC = () => {
         }
         try {
             await pyodide.runPythonAsync(`
-          import sys
-          from io import StringIO
-          sys.stdout = StringIO()
+        import sys
+        from io import StringIO
+        sys.stdout = StringIO()
       `);
             await pyodide.runPythonAsync(code);
             const output = await pyodide.runPythonAsync('sys.stdout.getvalue()');
@@ -99,7 +97,7 @@ const CodeEditor: React.FC = () => {
         setShowTerminal(true);
     };
 
-    // 保存代码到后端（调用 /api/autosave_code/）
+    // 自动保存代码到后端
     const handleSaveCode = async () => {
         try {
             const response = await fetch('http://localhost:8000/api/autosave_code/', {
@@ -121,7 +119,7 @@ const CodeEditor: React.FC = () => {
         }
     };
 
-    // 下一题：简单采用 problemId + 1，然后调用 /api/problems/ 获取题目信息，并更新编辑器状态
+    // 请求下一题，示例中简单采用 problemId+1
     const handleNextProblem = async () => {
         try {
             const nextId = problemId + 1;
@@ -132,7 +130,6 @@ const CodeEditor: React.FC = () => {
             }
             const data = await response.json();
             setProblemId(nextId);
-            // 假设后端返回题目的默认代码字段为 default_code，否则置空
             setCode(data.default_code || '');
             setTerminalOutput('');
             setOpenFeedback(false);
@@ -141,7 +138,6 @@ const CodeEditor: React.FC = () => {
         }
     };
 
-    // 反馈弹窗（仅显示静态反馈）
     const [openFeedback, setOpenFeedback] = React.useState(false);
     const handleFeedbackOpen = () => {
         setOpenFeedback(true);
@@ -152,7 +148,6 @@ const CodeEditor: React.FC = () => {
 
     return (
         <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {/* Toolbar */}
             <Box
                 sx={{
                     p: 1,
@@ -175,7 +170,6 @@ const CodeEditor: React.FC = () => {
                     <TaskAltIcon />
                 </IconButton>
             </Box>
-            {/* Main content area */}
             <Box sx={{ flexGrow: 1, height: 'calc(100% - 48px)' }}>
                 {showTerminal ? (
                     <Split sizes={[80, 20]} minSize={50} direction="vertical" gutterSize={5} style={{ height: '100%' }}>
@@ -219,7 +213,6 @@ const CodeEditor: React.FC = () => {
                     </Box>
                 )}
             </Box>
-            {/* Feedback Dialog */}
             <Dialog
                 open={openFeedback}
                 onClose={handleFeedbackClose}
@@ -238,7 +231,7 @@ const CodeEditor: React.FC = () => {
                         <strong>Strengths:</strong> Your code is well-structured and correctly implements merge sort. Great use of recursion! <span role="img" aria-label="thumbs up">👍</span>
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Areas for Improvement:</strong> Consider optimizing the merge process for large datasets to reduce overhead. <span role="img" aria-label="wrench">🔧</span>
+                        <String>Areas for Improvement:</String> Consider optimizing the merge process for large datasets to reduce overhead. <span role="img" aria-label="wrench">🔧</span>
                     </Typography>
                 </DialogContent>
                 <DialogActions>

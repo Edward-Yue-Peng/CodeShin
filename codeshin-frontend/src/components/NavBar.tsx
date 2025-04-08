@@ -1,5 +1,4 @@
-// src/components/NavBar.tsx
-import React from 'react';
+import React, {useContext} from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
@@ -9,6 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import LogoutIcon from '@mui/icons-material/Logout';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useTheme } from '@mui/material/styles';
@@ -18,6 +18,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import {UserContext} from "../context/UserContext";
 
 interface NavBarProps {
     onToggleAIPanel: () => void;
@@ -25,6 +26,7 @@ interface NavBarProps {
     pages: string[];
     currentMode: 'system' | 'light' | 'dark';
     onChangeColorMode: (mode: 'system' | 'light' | 'dark') => void;
+    username?: string;
 }
 
 const NavBar: React.FC<NavBarProps> = ({
@@ -33,12 +35,36 @@ const NavBar: React.FC<NavBarProps> = ({
                                            pages,
                                            currentMode,
                                            onChangeColorMode,
+                                           username,
                                        }) => {
     const theme = useTheme();
     const navigate = useNavigate();
-
     // 用于主题模式菜单
     const [anchorElTheme, setAnchorElTheme] = React.useState<null | HTMLElement>(null);
+    const { setUser } = useContext(UserContext);
+
+    const handleLogout = async () => {
+        try {
+            const res = await fetch('http://localhost:8000/api/logout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // 清除本地用户状态和 localStorage
+                setUser(null);
+                navigate('/login');
+            } else {
+                alert(data.error || '注销失败');
+            }
+        } catch (err) {
+            alert('网络错误，无法注销');
+        }
+    };
 
     const handleOpenThemeMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElTheme(event.currentTarget);
@@ -53,6 +79,9 @@ const NavBar: React.FC<NavBarProps> = ({
         if (currentMode === 'light') return <Brightness7Icon />;
         return <Brightness4Icon />;
     };
+
+    // 获取当前路径用于判断是否需要导航
+    const location = useLocation();
 
     return (
         <AppBar
@@ -85,8 +114,6 @@ const NavBar: React.FC<NavBarProps> = ({
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
                         {pages.map((page) => {
                             const path = `/${page.toLowerCase()}`;
-                            const location = useLocation();  // 获取当前路径
-
                             return (
                                 <Button
                                     key={page}
@@ -152,12 +179,18 @@ const NavBar: React.FC<NavBarProps> = ({
                         </IconButton>
                     </Tooltip>
 
-                    {/* 设置按钮 */}
-                    <Tooltip title="Open Settings">
-                        <IconButton onClick={onOpenUserMenu} sx={{ ml: 1 }} color="inherit">
-                            <SettingsIcon />
+                    {/* 登出按钮 */}
+                    <Tooltip title="Logout">
+                        <IconButton onClick={handleLogout} sx={{ ml: 1 }} color="inherit">
+                            <LogoutIcon />
                         </IconButton>
                     </Tooltip>
+                    {/* 显示用户名，如果存在的话 */}
+                    {username && (
+                        <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
+                            {username}
+                        </Typography>
+                    )}
                 </Toolbar>
             </Container>
         </AppBar>

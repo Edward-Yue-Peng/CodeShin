@@ -18,7 +18,12 @@ import { useTheme } from '@mui/material/styles';
 import Split from 'react-split';
 import { UserContext } from '../context/UserContext';
 
-const CodeEditor: React.FC = () => {
+interface CodeEditorProps {
+    autoSaveCode?: string;
+    problemID?: number;
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
     const theme = useTheme();
     const monacoTheme = theme.palette.mode === 'dark' ? 'vs-dark' : 'vs-light';
 
@@ -26,10 +31,20 @@ const CodeEditor: React.FC = () => {
     const { user } = useContext(UserContext);
     const userId = user ? user.userId : 0;
 
-    // 代码内容状态及其它状态
-    const [code, setCode] = useState('');
+    // 用外部传入的 autoSaveCode 初始化代码内容状态
+    const [code, setCode] = useState(autoSaveCode || '');
+    // 当 autoSaveCode 变化时，同步更新代码状态
+    useEffect(() => {
+        setCode(autoSaveCode || '');
+    }, [autoSaveCode]);
+
+    useEffect(() => {
+        setProblemId(problemID || 0);
+    }, [problemID]);
+
     const [terminalOutput, setTerminalOutput] = useState('');
     const [showTerminal, setShowTerminal] = useState(false);
+    // 题目进度可以根据需要设定，如果后续需要传入或由其它地方获取，也可以进行类似处理
     const [problemId, setProblemId] = useState(0);
     const [pyodide, setPyodide] = useState<any>(null);
     const [loadingPyodide, setLoadingPyodide] = useState(true);
@@ -49,26 +64,6 @@ const CodeEditor: React.FC = () => {
         loadPyodideAndPackages();
     }, []);
 
-    // 获取用户上次保存的代码与题目进度
-    useEffect(() => {
-        if (userId === 0) return;
-        async function fetchLastProgress() {
-            try {
-                const response = await fetch(`http://localhost:8000/api/get_progress_and_code/?user_id=${userId}`);
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(errText);
-                }
-                const data = await response.json();
-                setProblemId(data.current_problem_id || 0);
-                setCode(data.autosave_code || '');
-            } catch (error: any) {
-                console.error('Failed to fetch last saved code:', error);
-                setCode('');
-            }
-        }
-        fetchLastProgress();
-    }, [userId]);
 
     // 运行代码逻辑
     const handleRunCode = async () => {
@@ -84,10 +79,10 @@ const CodeEditor: React.FC = () => {
         }
         try {
             await pyodide.runPythonAsync(`
-        import sys
-        from io import StringIO
-        sys.stdout = StringIO()
-      `);
+                import sys
+                from io import StringIO
+                sys.stdout = StringIO()
+            `);
             await pyodide.runPythonAsync(code);
             const output = await pyodide.runPythonAsync('sys.stdout.getvalue()');
             setTerminalOutput(output);
@@ -138,7 +133,7 @@ const CodeEditor: React.FC = () => {
         }
     };
 
-    const [openFeedback, setOpenFeedback] = React.useState(false);
+    const [openFeedback, setOpenFeedback] = useState(false);
     const handleFeedbackOpen = () => {
         setOpenFeedback(true);
     };
@@ -231,7 +226,7 @@ const CodeEditor: React.FC = () => {
                         <strong>Strengths:</strong> Your code is well-structured and correctly implements merge sort. Great use of recursion! <span role="img" aria-label="thumbs up">👍</span>
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <String>Areas for Improvement:</String> Consider optimizing the merge process for large datasets to reduce overhead. <span role="img" aria-label="wrench">🔧</span>
+                        <strong>Areas for Improvement:</strong> Consider optimizing the merge process for large datasets to reduce overhead. <span role="img" aria-label="wrench">🔧</span>
                     </Typography>
                 </DialogContent>
                 <DialogActions>

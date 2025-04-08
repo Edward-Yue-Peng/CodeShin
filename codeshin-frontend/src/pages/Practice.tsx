@@ -14,9 +14,38 @@ const AIPanel = lazy(() => import('../components/AIPanel'));
 
 function Practice() {
     // Snackbar 状态
+    const { user } = useContext(UserContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [saveCode, setSaveCode] = useState<string>();
+    const [problemID, setProblemID] = useState<number>();
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/get_progress_and_code/?user_id=${user?.userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                console.error('请求失败，使用默认值');
+                setSaveCode("print('Hello World')");
+                setProblemID(1);
+                return;
+            }
 
+            const data = await response.json();
+            console.log(data);
+            setSaveCode(data.autosave_code);
+            setProblemID(data.current_problem_id);
+        } catch (error) {
+            console.error('GET 请求出错:', error);
+        }
+    };
     useEffect(() => {
+        if (user?.userId) {
+            fetchData();
+        }
+
         const handleKeyDown = (event: KeyboardEvent) => {
             if ((event.ctrlKey || event.metaKey) && event.key === 's') {
                 event.preventDefault();
@@ -27,15 +56,13 @@ function Practice() {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
-
+    }, [user]);
     const handleShowSaveNotification = () => {
         setOpenSnackbar(true);
     };
     const handleCloseSnackbar = () => {
         setOpenSnackbar(false);
     };
-
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
     const [storedThreeSizes, setStoredThreeSizes] = useState<number[]>([25, 50, 25]);
     const [aiVisible, setAiVisible] = useState(true);
@@ -67,14 +94,12 @@ function Practice() {
         }
     };
 
-    const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+    const [, setAnchorElUser] = useState<null | HTMLElement>(null);
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
     };
 
     const pages = ['Practice', 'Home', 'Analysis'];
-
-    const { user } = useContext(UserContext);
 
     return (
         <ThemeProvider theme={theme}>
@@ -114,7 +139,7 @@ function Practice() {
                             minHeight: 0,
                         }}
                     >
-                        <Description />
+                        <Description problemID={problemID} />
                     </Box>
 
                     {/* 中间：代码编辑器 */}
@@ -127,7 +152,7 @@ function Practice() {
                         }}
                     >
                         <Suspense fallback={<div>Loading Code Editor...</div>}>
-                            <CodeEditor />
+                            <CodeEditor autoSaveCode={saveCode} problemID={problemID}/>
                         </Suspense>
                     </Box>
 

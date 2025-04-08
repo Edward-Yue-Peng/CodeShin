@@ -22,17 +22,21 @@ interface ProblemData {
     rating: number;
     similar_questions: string;
 }
+interface DescriptionProps {
+    problemID?: number;
+}
 
-const Description = () => {
+const Description: React.FC<DescriptionProps> = ({problemID}) => {
     const theme = useTheme();
     const [problem, setProblem] = useState<ProblemData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
+        if (!problemID) return;
         async function fetchProblem() {
             try {
-                const response = await fetch('http://localhost:8000/api/problems/?id=5');
+                const response = await fetch(`http://localhost:8000/api/problems/?id=${problemID}`);
                 if (!response.ok) {
                     const errText = await response.text();
                     throw new Error(errText);
@@ -46,7 +50,7 @@ const Description = () => {
             }
         }
         fetchProblem();
-    }, []);
+    }, [problemID]);
 
     if (loading) {
         return (

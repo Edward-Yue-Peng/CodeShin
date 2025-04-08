@@ -43,6 +43,21 @@ class Problem(models.Model):
 
     def __str__(self):
         return self.title
+    
+# 题目与主题的关联模型
+class TopicProblem(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='topic_problems')  # 主题外键
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='problem_topics')  # 题目外键
+    difficulty = models.CharField(max_length=10, choices=[('Easy', 'Easy'), ('Medium', 'Medium'), ('Hard', 'Hard')])  # 难度
+
+    class Meta:
+        db_table = 'topic_problems'  # 数据库表名
+        verbose_name = 'Topic Problem'
+        verbose_name_plural = 'Topic Problems'
+        unique_together = ('topic', 'problem')  # 确保同一主题和题目不会重复
+
+    def __str__(self):
+        return f"{self.topic.name} - {self.problem.title} ({self.difficulty})"
 
 
 # 用户提交历史模型

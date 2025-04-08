@@ -14,6 +14,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import SaveIcon from '@mui/icons-material/Save';
+import SendIcon from '@mui/icons-material/Send';
 import { useTheme } from '@mui/material/styles';
 import Split from 'react-split';
 import { UserContext } from '../context/UserContext';
@@ -21,40 +22,53 @@ import { UserContext } from '../context/UserContext';
 interface CodeEditorProps {
     autoSaveCode?: string;
     problemID?: number;
+    onCodeChange?: (code: string) => void;
+    onSave?: (code: string) => Promise<void>;
+    onSubmit?: (code: string) => Promise<void>;
+    onNextProblem?: () => Promise<void>;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({
+                                                   autoSaveCode,
+                                                   problemID,
+                                                   onCodeChange,
+                                                   onSave,
+                                                   onSubmit,
+                                                   onNextProblem,
+                                               }) => {
     const theme = useTheme();
     const monacoTheme = theme.palette.mode === 'dark' ? 'vs-dark' : 'vs-light';
-
-    // 从 context 中获取当前用户
-    const { user } = useContext(UserContext);
-    const userId = user ? user.userId : 0;
-
-    // 用外部传入的 autoSaveCode 初始化代码内容状态
+    // 本地维护编辑器内容，变化时通知父组件
     const [code, setCode] = useState(autoSaveCode || '');
-    // 当 autoSaveCode 变化时，同步更新代码状态
     useEffect(() => {
         setCode(autoSaveCode || '');
     }, [autoSaveCode]);
-
     useEffect(() => {
-        setProblemId(problemID || 0);
-    }, [problemID]);
-
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault();
+                handleLocalSave();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
     const [terminalOutput, setTerminalOutput] = useState('');
     const [showTerminal, setShowTerminal] = useState(false);
-    // 题目进度可以根据需要设定，如果后续需要传入或由其它地方获取，也可以进行类似处理
-    const [problemId, setProblemId] = useState(0);
     const [pyodide, setPyodide] = useState<any>(null);
     const [loadingPyodide, setLoadingPyodide] = useState(true);
 
+    // 加载 Pyodide
     useEffect(() => {
         const loadPyodideAndPackages = async () => {
             setLoadingPyodide(true);
             try {
                 // @ts-ignore
-                const pyodideInstance = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.2/full/' });
+                const pyodideInstance = await window.loadPyodide({
+                    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.2/full/',
+                });
                 setPyodide(pyodideInstance);
             } catch (error) {
                 console.error('Failed to load Pyodide:', error);
@@ -63,7 +77,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
         };
         loadPyodideAndPackages();
     }, []);
-
 
     // 运行代码逻辑
     const handleRunCode = async () => {
@@ -79,10 +92,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
         }
         try {
             await pyodide.runPythonAsync(`
-                import sys
-                from io import StringIO
-                sys.stdout = StringIO()
-            `);
+        import sys
+        from io import StringIO
+        sys.stdout = StringIO()
+      `);
             await pyodide.runPythonAsync(code);
             const output = await pyodide.runPythonAsync('sys.stdout.getvalue()');
             setTerminalOutput(output);
@@ -92,57 +105,34 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
         setShowTerminal(true);
     };
 
-    // 自动保存代码到后端
-    const handleSaveCode = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/api/autosave_code/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: userId,
-                    problem_id: problemId,
-                    autosave_code: code,
-                }),
-            });
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(errText);
-            }
-            alert('Code saved successfully!');
-        } catch (error: any) {
-            alert('Save failed: ' + error.message);
-        }
+    // 当编辑器内容变化时，本地更新并调用 onCodeChange 回调（若存在）
+    const handleCodeChange = (value: string | undefined) => {
+        const newCode = value || '';
+        setCode(newCode);
+        if (onCodeChange) onCodeChange(newCode);
     };
 
-    // 请求下一题，示例中简单采用 problemId+1
-    const handleNextProblem = async () => {
-        try {
-            const nextId = problemId + 1;
-            const response = await fetch(`http://localhost:8000/api/problems/?id=${nextId}`);
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(errText);
-            }
-            const data = await response.json();
-            setProblemId(nextId);
-            setCode(data.default_code || '');
-            setTerminalOutput('');
-            setOpenFeedback(false);
-        } catch (error: any) {
-            alert('Failed to load next problem: ' + error.message);
-        }
+    // 在子组件内部，只负责调用父组件传入的回调，这里不直接调用 API
+    const handleLocalSave = async () => {
+        if (onSave) await onSave(code);
     };
 
+    const handleLocalSubmit = async () => {
+        if (onSubmit) await onSubmit(code);
+    };
+
+    const handleLocalNextProblem = async () => {
+        if (onNextProblem) await onNextProblem();
+    };
+
+    // 反馈对话框控制（可继续在子组件中做本地展示，如不需要可以移到父组件）
     const [openFeedback, setOpenFeedback] = useState(false);
-    const handleFeedbackOpen = () => {
-        setOpenFeedback(true);
-    };
-    const handleFeedbackClose = () => {
-        setOpenFeedback(false);
-    };
+    const handleFeedbackOpen = () => setOpenFeedback(true);
+    const handleFeedbackClose = () => setOpenFeedback(false);
 
     return (
         <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            {/* 工具栏 */}
             <Box
                 sx={{
                     p: 1,
@@ -158,20 +148,25 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
                 <IconButton size="small" color="inherit" onClick={() => setShowTerminal((prev) => !prev)}>
                     <TerminalIcon />
                 </IconButton>
-                <IconButton size="small" color="inherit" onClick={handleSaveCode}>
+                <IconButton size="small" color="inherit" onClick={handleLocalSave}>
                     <SaveIcon />
+                </IconButton>
+                <IconButton size="small" color="inherit" onClick={handleLocalSubmit}>
+                    <SendIcon />
                 </IconButton>
                 <IconButton size="small" color="primary" sx={{ ml: 'auto' }} onClick={handleFeedbackOpen}>
                     <TaskAltIcon />
                 </IconButton>
             </Box>
+
+            {/* 编辑器与终端区域 */}
             <Box sx={{ flexGrow: 1, height: 'calc(100% - 48px)' }}>
                 {showTerminal ? (
                     <Split sizes={[80, 20]} minSize={50} direction="vertical" gutterSize={5} style={{ height: '100%' }}>
                         <Box sx={{ height: '100%' }}>
                             <Editor
                                 value={code}
-                                onChange={(value) => setCode(value || '')}
+                                onChange={handleCodeChange}
                                 language="python"
                                 theme={monacoTheme}
                                 options={{ automaticLayout: true, fontSize: 16, minimap: { enabled: false } }}
@@ -198,7 +193,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
                     <Box sx={{ height: '100%' }}>
                         <Editor
                             value={code}
-                            onChange={(value) => setCode(value || '')}
+                            onChange={handleCodeChange}
                             language="python"
                             theme={monacoTheme}
                             options={{ automaticLayout: true, fontSize: 16, minimap: { enabled: false } }}
@@ -208,13 +203,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
                     </Box>
                 )}
             </Box>
-            <Dialog
-                open={openFeedback}
-                onClose={handleFeedbackClose}
-                slotProps={{
-                    paper: { sx: { p: 2, borderRadius: 2 } },
-                }}
-            >
+
+            {/* 反馈对话框（仅为示例，反馈内容可由父组件控制并统一） */}
+            <Dialog open={openFeedback} onClose={handleFeedbackClose} slotProps={{ paper: { sx: { p: 2, borderRadius: 2 } } }}>
                 <DialogTitle>
                     Merge Sort Feedback <span role="img" aria-label="feedback">💡</span>
                 </DialogTitle>
@@ -223,14 +214,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ autoSaveCode,problemID }) => {
                         Overall, your merge sort implementation looks solid!
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Strengths:</strong> Your code is well-structured and correctly implements merge sort. Great use of recursion! <span role="img" aria-label="thumbs up">👍</span>
+                        <strong>Strengths:</strong> Your code is well-structured and correctly implements merge sort.
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Areas for Improvement:</strong> Consider optimizing the merge process for large datasets to reduce overhead. <span role="img" aria-label="wrench">🔧</span>
+                        <strong>Areas for Improvement:</strong> Consider optimizing the merge process for large datasets.
                     </Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="outlined" onClick={handleNextProblem}>
+                    <Button variant="outlined" onClick={handleLocalNextProblem}>
                         Next Problem
                     </Button>
                 </DialogActions>

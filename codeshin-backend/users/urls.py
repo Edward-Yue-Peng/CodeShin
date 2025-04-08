@@ -14,6 +14,8 @@ from .views import (
     get_related_topics_mastery_api,
     get_all_topics_mastery_api,
     get_similar_questions_api,
+    get_topic_difficulty_bucket,
+    get_topic_index, 
     set_recommendations,
     get_recommendations,
     create_conversation_session,
@@ -43,6 +45,9 @@ urlpatterns = [
     path('related_topics_mastery/', get_related_topics_mastery_api, name='get_related_topics_mastery'),  # 获取当前题目相关 topic 的掌握度
     path('all_topics_mastery/', get_all_topics_mastery_api, name='get_all_topics_mastery'),  # 获取所有 topic 的掌握度
     path('similar_questions/', get_similar_questions_api, name='get_similar_questions'),  # 获取当前题目的相似题目
+
+    path('topics_difficulty_bucket/', get_topic_difficulty_bucket, name='get_topic_difficulty_bucket'),  # 获取某个知识点对应的不同难度的题目ID
+    path('topics_index/', get_topic_index, name='get_topic_index'),  # 获取某个知识点的排序号
 
     path('set_recommendations/', set_recommendations, name='set_recommendations'),  # 存储推荐题目
     path('get_recommendations/', get_recommendations, name='get_recommendations'),  # 读取推荐题目

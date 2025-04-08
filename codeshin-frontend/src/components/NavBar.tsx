@@ -22,7 +22,6 @@ import {UserContext} from "../context/UserContext";
 
 interface NavBarProps {
     onToggleAIPanel: () => void;
-    onOpenUserMenu: (event: React.MouseEvent<HTMLElement>) => void;
     pages: string[];
     currentMode: 'system' | 'light' | 'dark';
     onChangeColorMode: (mode: 'system' | 'light' | 'dark') => void;
@@ -31,7 +30,6 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({
                                            onToggleAIPanel,
-                                           onOpenUserMenu,
                                            pages,
                                            currentMode,
                                            onChangeColorMode,

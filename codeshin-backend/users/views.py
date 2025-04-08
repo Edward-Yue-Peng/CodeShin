@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator, EmptyPage
 from .models import (
     Problem, UserHistory, AutosaveCode, UserTopicMastery, Recommendation,
-    GptConversation, ConversationSession, Topic
+    GptConversation, ConversationSession, Topic, TopicProblem
 )
 from .utils import initialize_user_topics, gpt_score
 import json
@@ -53,8 +53,10 @@ def user_login(request):
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
+
         if not username or not password:
             return JsonResponse({'error': 'Missing required fields'}, status=400)
+
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
@@ -484,6 +486,70 @@ def get_similar_questions_api(request):
 
         return JsonResponse({"similar_questions": similar_questions}, status=200)
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+@csrf_exempt
+def get_topic_difficulty_bucket(request):
+    """获取某个知识点对应的不同难度的题目ID"""
+    if request.method == 'GET':
+        topic_name = request.GET.get('topic')
+        if not topic_name:
+            return JsonResponse({"error": "Missing topic"}, status=400)
+
+        try:
+            topic = Topic.objects.get(name=topic_name)
+            topic_problems = TopicProblem.objects.filter(topic=topic).select_related('problem')
+            difficulty_bucket = {
+                'Easy': [],
+                'Medium': [],
+                'Hard': []
+            }
+            for tp in topic_problems:
+                difficulty_bucket[tp.difficulty].append(tp.problem.id)
+
+            # 将难度级别映射为数字 (如果前端需要)
+            numeric_difficulty_bucket = {}
+            difficulty_mapping = {'Easy': 1, 'Medium': 2, 'Hard': 3}
+            for difficulty, problem_ids in difficulty_bucket.items():
+                if problem_ids:
+                    numeric_difficulty_bucket[difficulty_mapping[difficulty]] = problem_ids
+
+            if not numeric_difficulty_bucket:
+                return JsonResponse({"error": "Can't find this topic's difficulty bucket"}, status=404)
+
+            return JsonResponse({"difficulty bucket": numeric_difficulty_bucket}, status=200)
+
+        except Topic.DoesNotExist:
+            return JsonResponse({"error": "Can't find this topic's difficulty bucket"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+@csrf_exempt
+def get_topic_index(request):
+    """获取某个知识点的排序号（从 1 开始）"""
+    if request.method == 'GET':
+        topic_name = request.GET.get('topic')
+        if not topic_name:
+            return JsonResponse({"error": "Missing topic"}, status=400)
+
+        if topic_name not in ALL_TOPICS:
+            return JsonResponse({"error": "Can't find this topic's index"}, status=404)
+
+        index = ALL_TOPICS.index(topic_name)
+        topic_index = index + 1  # 返回从 1 开始的索引
+        previous_topic = ALL_TOPICS[index - 1] if index > 0 else None
+        next_topic = ALL_TOPICS[index + 1] if index < len(ALL_TOPICS) - 1 else None
+
+        return JsonResponse({
+            "topic index": topic_index,
+            "previous topic": previous_topic,
+            "next topic": next_topic
+        }, status=200)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 # 推荐题号的写和读
 

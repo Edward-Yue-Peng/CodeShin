@@ -39,7 +39,7 @@
             "error": "Missing required fields"
         }
         ```
-        或
+      或
         ```json
         {
             "error": "Username already exists"
@@ -70,7 +70,7 @@
         ```json
         {
             "message": "Login successful",
-            "userid": 1
+            "user_id": 1
         }
         ```
 - **失败**:
@@ -81,7 +81,7 @@
             "error": "Missing required fields"
         }
         ```
-        或
+      或
         ```json
         {
             "error": "Invalid credentials"
@@ -195,7 +195,8 @@
                 "dislikes": 321,
                 "rating": 4.2,
                 "similar_questions": "Two Sum, Four Sum"
-            }
+            },
+            // ... 更多题目
         ]
         ```
 - **失败**:
@@ -563,6 +564,7 @@
             }
         }
         ```
+      **注意**如果从未做过这类题，掌握度缺省为-1.0。
 - **失败**:
     - 状态码: `400 Bad Request`
     - 响应体:
@@ -600,6 +602,7 @@
             "similar_questions": [295, 703, 1024]
         }
         ```
+      **注意**若无相似题目，返回空列表。
 - **失败**:
     - 状态码: `400 Bad Request`
     - 响应体:
@@ -624,6 +627,87 @@
         ```
 
 ---
+
+### 7. 获取某个知识点对应的不同难度的题目ID
+- **URL**: `/api/topics_difficulty_bucket/`
+- **方法**: `GET`
+- **描述**: 获取指定知识点对应的不同难度的题目ID列表。
+
+#### 请求
+- **请求头**: 无
+- **请求参数**:
+    - `topic`（必填）：知识点名称。
+
+#### 响应
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "difficulty bucket": {
+                "1": [100, 101, 102],
+                "2": [103, 104, 105],
+                "3": [201, 203, 204]
+            }
+        }
+        ```
+      **注意:** 难度级别映射：1 - Easy, 2 - Medium, 3 - Hard。
+      **注意:** 0表示对应为空。
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing topic"
+        }
+        ```
+    - 状态码: `404 Not Found`
+    - 响应体:
+        ```json
+        {
+            "error": "Can't find this topic's difficulty bucket"
+        }
+        ```
+
+---
+
+### 8. 获取某个知识点的排序号
+- **URL**: `/api/topics_index/`
+- **方法**: `GET`
+- **描述**: 获取指定知识点在预定义列表中的排序号，以及其前一个和后一个知识点（如果存在）。
+
+#### 请求
+- **请求头**: 无
+- **请求参数**:
+    - `topic`（必填）：知识点名称。
+
+#### 响应
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "topic index": 34,
+            "previous topic": "array",
+            "next topic": "linked list"
+        }
+        ```
+      **注意:** `topic index` 是从 1 开始的排序号。`previous topic` 和 `next topic` 可能为 `null`。
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing topic"
+        }
+        ```
+    - 状态码: `404 Not Found`
+    - 响应体:
+        ```json
+        {
+            "error": "Can't find this topic's index"
+        }
+        ```
 
 ## 推荐题号的写和读
 

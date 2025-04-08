@@ -61,7 +61,7 @@ def insert_data_to_db(dataframe):
 # 主函数
 def main():
     # 读取 CSV 文件
-    csv_file_path = '/Users/pengyue/PycharmProjects/YuanshenBackend/yuanshen/Database_prep/problems_latest.csv'
+    csv_file_path = '/Users/66west/Lions/yuanshen/Database_prep/problems_latest.csv'
     df = pd.read_csv(csv_file_path)
 
     # 打印列名和前几行数据以进行调试

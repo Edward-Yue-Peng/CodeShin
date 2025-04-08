@@ -972,9 +972,9 @@
     ```json
     {
     "user_id": 1,
-    "passed": True
+    "passed": "Yes" or "No"
     "Feedback": "You have good grasp of ....but...."
-    "Ratings": {"array": 1, "linked list": 2} 
+    "Ratings of related topics": {"array": 1, "linked list": 2} 
 }
     ```
 

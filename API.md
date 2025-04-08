@@ -697,6 +697,84 @@
         ```
 
 ---
+### 7. 获取某个知识点对应的不同难度的题目ID
+- **URL**: `/api/topics_difficulty_bucket/`
+- **方法**: `GET`
+- **描述**: 获取某个知识点对应的不同难度的题目ID
+
+#### 请求
+- **请求头**: 无
+- **请求参数**:
+    - `topic`（必填）：知识点名称。
+
+#### 响应
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "difficulty bucket": {
+                1:[100,101,102],
+                2:[103,104,105],
+                3:[201,203,204],
+            }
+        }
+        ```
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing topic"
+        }
+        ```
+    - 状态码: `404 Not Found`
+    - 响应体:
+        ```json
+        {
+            "error": "Can't find this topic's difficulty bucket"
+        }
+        ```
+---
+### 8. 获取某个知识点的排序号
+- **URL**: `/api/topics_index/`
+- **方法**: `GET`
+- **描述**: 获取某个知识点的排序号
+
+#### 请求
+- **请求头**: 无
+- **请求参数**:
+    - `topic`（必填）：知识点名称。
+
+#### 响应
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "topic index": 34,
+            "previous topic":"array"
+            "next topic":"linked list"
+               
+            }
+        }
+        ```
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing topic"
+        }
+        ```
+    - 状态码: `404 Not Found`
+    - 响应体:
+        ```json
+        {
+            "error": "Can't find this topic's index"
+        }
+        ```
+---
 
 ## GPT 相关 API
 

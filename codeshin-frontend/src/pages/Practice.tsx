@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, lazy, Suspense, useContext } from 'react';
 import Box from '@mui/material/Box';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Split from 'react-split';
 import {
     createTheme,
@@ -148,9 +149,15 @@ function Practice() {
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
     const [aiVisible, setAiVisible] = useState(true);
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
-
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    const effectiveMode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
+    const theme = createTheme({
+        palette: {
+            mode: effectiveMode,
+        },
+    });
     return (
-        <ThemeProvider theme={createTheme({ palette: { mode: colorMode === 'system' ? 'light' : colorMode } })}>
+        <ThemeProvider theme={theme}>
             <CssBaseline />
             <NavBar
                 // 将控制 AI panel、颜色模式等通过 props 传给 NavBar

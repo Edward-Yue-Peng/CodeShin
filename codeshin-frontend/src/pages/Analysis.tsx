@@ -35,7 +35,6 @@ function Analysis() {
             <CssBaseline />
             <NavBar
                 onToggleAIPanel={() => {}}
-                onOpenUserMenu={() => {}}
                 pages={pages}
                 currentMode={colorMode}
                 onChangeColorMode={setColorMode}

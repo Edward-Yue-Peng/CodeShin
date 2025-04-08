@@ -33,8 +33,7 @@ function Home() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <NavBar
-                onToggleAIPanel={() => {}} // 主页不需要 AI 面板
-                onOpenUserMenu={() => {}}
+                onToggleAIPanel={() => {}}
                 pages={pages}
                 currentMode={colorMode}
                 onChangeColorMode={setColorMode}

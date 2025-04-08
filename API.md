@@ -961,6 +961,40 @@
             "error": "Missing user_id or problem_id"
         }
         ```
+### 5. 返回并存储代码分析结果
+- **URL**: `/api/set_code_analysis/`
+- **方法**: `POST`
+- **描述**: 返回gpt给的文字feedback和对用户在此题相关知识点上的评分
+
+#### 请求
+- **请求头**: `Content-Type: application/json`
+- **请求体**:
+    ```json
+    {
+    "user_id": 1,
+    "passed": True
+    "Feedback": "You have good grasp of ....but...."
+    "Ratings": {"array": 1, "linked list": 2} 
+}
+    ```
+
+#### 响应
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "message": "Analysis saved successfully"
+        }
+        ```
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing required fields"
+        }
+        ```
 
 ---
 

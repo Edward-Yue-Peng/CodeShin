@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="实现保存">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/API.md" beforeDir="false" afterPath="$PROJECT_DIR$/API.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-backend/Database_prep/sorted_topics_id.csv" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-backend/Database_prep/sorted_topics_id.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-backend/import_questions.py" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-backend/import_questions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-backend/requirements.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-backend/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-backend/users/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-backend/users/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-backend/users/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-backend/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-backend/users/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-backend/yuanshen/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-backend/yuanshen/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/components/CodeEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/components/CodeEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/components/NavBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/components/NavBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codeshin-frontend/src/pages/Practice.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/codeshin-frontend/src/pages/Practice.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="fab9a3fd-cb1f-47e2-878d-e1348d4513e9" name="Changes" comment="实现保存" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,24 +45,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;JavaScript Debug.localhost:5173.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/pengyue/Documents/GitHub/CodeShin&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/pengyue/Documents/GitHub/CodeShin/codeshin-frontend/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "JavaScript Debug.localhost:5173.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Administrator/Desktop/CodeShin/codeshin-backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "ts.external.directory.path": "/Users/pengyue/Documents/GitHub/CodeShin/codeshin-frontend/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/codeshin-frontend/src/pages" />
@@ -86,16 +73,12 @@
     <configuration name="localhost:5173" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:5173/">
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="JavaScript Debug.localhost:5173" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-WS-243.26053.12" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
+        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
       </set>
     </attachedChunks>
   </component>
@@ -123,6 +106,7 @@
       <workItem from="1744038357130" duration="164000" />
       <workItem from="1744097991263" duration="17000" />
       <workItem from="1744098658027" duration="12854000" />
+      <workItem from="1744172480599" duration="49000" />
     </task>
     <task id="LOCAL-00001" summary="initialize Vite project with React and Material UI setup">
       <option name="closed" value="true" />

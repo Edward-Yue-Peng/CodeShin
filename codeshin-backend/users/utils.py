@@ -1,3 +1,5 @@
+import numpy as np
+
 from .constants import ALL_TOPICS
 from .models import UserTopicMastery
 import random
@@ -45,7 +47,7 @@ def level(mastery_value):
     if mastery_value < 0.66: return 2
     return 3
 
-def weight():
+'''def weight():
     sim_vs_common = float(input("1. 请输入相似性得分相对于共同话题得分的重要性（从1到9的整数，重要性从小到大递升）： "))
     sim_vs_diff = float(input("2. 请输入相似性得分相对于难度匹配得分的重要性： "))
     common_vs_diff = float(input("3. 请输入共同话题得分相对于难度匹配得分的重要性： "))
@@ -56,10 +58,12 @@ def weight():
     ])
     geo_mean = np.prod(matrix, axis=1) ** (1 / 3)
     weights = geo_mean / geo_mean.sum()
-    return weights
+    return weights'''
 
 def recommender(user_id):
-    W_SIMILARITY, W_COMMON_TOPICS, W_DIFFICULTY =weight()
+    W_SIMILARITY = 0.4
+    W_COMMON_TOPICS = 0.4
+    W_DIFFICULTY = 0.2
 
     cur_pid = api_get("/api/current_problem/", {"user_id": user_id})["current_problem_id"]
     related_topics = api_get("/api/related_topics/", {"problem_id": cur_pid})["related_topics"]

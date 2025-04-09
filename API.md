@@ -971,7 +971,6 @@
 - **请求体**:
     ```json
     {
-    "user_id": 1,
     "passed": "Yes" or "No"
     "Feedback": "You have good grasp of ....but...."
     "Ratings of related topics": {"array": 1, "linked list": 2} 

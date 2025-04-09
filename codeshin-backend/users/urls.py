@@ -19,9 +19,10 @@ from .views import (
     set_recommendations,
     get_recommendations,
     create_conversation_session,
-    save_gpt_conversation,
+    gpt_interaction_api,
     get_gpt_conversations,
     clear_gpt_conversations,
+    recommender
 )
 
 urlpatterns = [
@@ -49,12 +50,14 @@ urlpatterns = [
     path('topics_difficulty_bucket/', get_topic_difficulty_bucket, name='get_topic_difficulty_bucket'),  # 获取某个知识点对应的不同难度的题目ID
     path('topics_index/', get_topic_index, name='get_topic_index'),  # 获取某个知识点的排序号
 
+    path('recommender/<int:user_id>/', recommender, name='recommender'),  # 推荐系统的视图函数
+
     path('set_recommendations/', set_recommendations, name='set_recommendations'),  # 存储推荐题目
     path('get_recommendations/', get_recommendations, name='get_recommendations'),  # 读取推荐题目
 
     # GPT 相关 API
     path('create_conversation_session/', create_conversation_session, name='create_conversation_session'),  #创建新对话
-    path('save_gpt_conversation/', save_gpt_conversation, name='save_gpt_conversation'),  # 存储对话记录
+    path('gpt_interaction/', gpt_interaction_api, name='gpt_interaction_api'),  # GPT 交互
     path('get_gpt_conversations/', get_gpt_conversations, name='get_gpt_conversations'),  # 获取对话记录
     path('clear_gpt_conversations/', clear_gpt_conversations, name='clear_gpt_conversations'),  # 清空对话记录
 ]

@@ -9,8 +9,9 @@ from .models import (
     Problem, UserHistory, AutosaveCode, UserTopicMastery, Recommendation,
     GptConversation, ConversationSession, Topic, TopicProblem
 )
-from .utils import initialize_user_topics, gpt_score
+from .utils import initialize_user_topics, gpt_score, recommender
 import json
+import requests
 from .constants import ALL_TOPICS
 
 # 用户管理系统
@@ -149,14 +150,10 @@ def submit_code(request):
             if not user_id_from_request or not problem_id_from_request or not solution_code:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
-            user = None
-            problem = None
-
+            # 检查用户和题目是否存在
             try:
                 user = User.objects.get(id=user_id_from_request)
                 problem = Problem.objects.get(id=problem_id_from_request)
-                user_id = user.id
-                problem_id = problem.id
             except User.DoesNotExist:
                 return JsonResponse({"error": "Invalid user_id"}, status=400)
             except Problem.DoesNotExist:
@@ -168,8 +165,8 @@ def submit_code(request):
 
             # 保存用户提交记录
             UserHistory.objects.create(
-                user_id=user,  # 使用 user 模型实例
-                problem_id=problem,  # 使用 problem 模型实例
+                user_id=user,
+                problem_id=problem,
                 solution_code=solution_code,
                 version=new_version,
                 is_passed=is_passed,
@@ -201,7 +198,16 @@ def submit_code(request):
                     defaults={"mastery_level": score}
                 )
 
-            return JsonResponse({"message": "Code submitted and scored successfully", "version": new_version}, status=201)
+            # **调用推荐系统逻辑**
+            recommendations = recommender(user.id)  # 调用推荐系统函数
+
+            # 返回响应，包括推荐结果
+            return JsonResponse({
+                "message": "Code submitted and scored successfully",
+                "version": new_version,
+                "recommendations": recommendations  # 将推荐结果返回给用户
+            }, status=201)
+
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
@@ -254,24 +260,25 @@ def get_progress_and_code(request):
             return JsonResponse({"error": "Missing user_id"}, status=400)
 
         try:
-            # 获取 autosave_codes 中的记录
-            progress = AutosaveCode.objects.get(user_id=user_id)
-            current_problem_id = progress.problem_id
-            autosave_code = progress.autosave_code
+            # 优先从 AutosaveCode 中获取用户的当前进度
+            progress = AutosaveCode.objects.filter(user_id=user_id).order_by('-timestamp').first()
+            if progress:
+                current_problem_id = progress.problem_id
+                autosave_code = progress.autosave_code
 
-            # 检查是否有手动提交的代码
-            submitted_code = None
-            latest_submission = UserHistory.objects.filter(user_id=user_id, problem_id=current_problem_id).order_by('-version').first()
-            if latest_submission:
-                submitted_code = latest_submission.solution_code
+                # 检查是否有手动提交的代码
+                submitted_code = None
+                latest_submission = UserHistory.objects.filter(user_id=user_id, problem_id=current_problem_id).order_by('-version').first()
+                if latest_submission:
+                    submitted_code = latest_submission.solution_code
 
-            return JsonResponse({
-                "current_problem_id": current_problem_id.id,  # 获取 Problem 实例的 ID
-                "autosave_code": autosave_code,
-                "submitted_code": submitted_code
-            }, status=200)
-        except AutosaveCode.DoesNotExist:
-            # 如果没有 autosave_codes，返回 user_history 中的最新记录
+                return JsonResponse({
+                    "current_problem_id": current_problem_id.id,  # 获取 Problem 实例的 ID
+                    "autosave_code": autosave_code,
+                    "submitted_code": submitted_code
+                }, status=200)
+
+            # 如果 AutosaveCode 中没有记录，返回 UserHistory 中的最新记录
             latest_submission = UserHistory.objects.filter(user_id=user_id).order_by('-timestamp').first()
             if latest_submission:
                 return JsonResponse({
@@ -279,8 +286,10 @@ def get_progress_and_code(request):
                     "autosave_code": None,
                     "submitted_code": latest_submission.solution_code
                 }, status=200)
+
             return JsonResponse({"error": "No progress found for the user"}, status=404)
-        except Problem.DoesNotExist:  # 建议添加对 Problem 不存在的处理
+
+        except Problem.DoesNotExist:
             return JsonResponse({"error": "Problem not found"}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
@@ -555,38 +564,34 @@ def get_topic_index(request):
 
 @csrf_exempt
 def set_recommendations(request):
-    """存储推荐题目（覆盖原有列表）"""
+    """写入推荐题目"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             user_id = data.get('user_id')
-            recommended_problems = data.get('recommended_problems')
+            recommended_problems = data.get('recommended_problems')  # 推荐题目列表
 
             if not user_id or not recommended_problems:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
-            try:
-                user = User.objects.get(id=user_id)
-            except User.DoesNotExist:
-                return JsonResponse({"error": f"User with ID {user_id} does not exist"}, status=400)
-            except Exception as e:
-                return JsonResponse({"error": f"Error retrieving user: {e}"}, status=500)
+            # 检查用户是否存在
+            if not User.objects.filter(id=user_id).exists():
+                return JsonResponse({"error": "Invalid user_id"}, status=400)
 
-            # 删除原有的推荐记录
-            Recommendation.objects.filter(user_id=user).delete()  # 使用用户的 ID 进行过滤
-
-            # 将推荐题目ID列表存储为逗号分隔的字符串
+            # 将推荐题目列表转换为字符串存储
             recommended_problems_str = ",".join(map(str, recommended_problems))
 
-            # 创建新的推荐记录
-            Recommendation.objects.create(
-                user_id=user,
-                recommended_problems=recommended_problems_str
+            # 更新或创建推荐记录
+            Recommendation.objects.update_or_create(
+                user_id=user_id,
+                defaults={"recommended_problems": recommended_problems_str}
             )
 
-            return JsonResponse({"message": "Recommendations saved successfully"}, status=200)
+            return JsonResponse({"message": "Recommendations saved successfully"}, status=201)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
@@ -652,18 +657,19 @@ def create_conversation_session(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+
 @csrf_exempt
-def save_gpt_conversation(request):
-    """存储用户与 GPT 的对话记录"""
+def gpt_interaction_api(request):
+    """处理用户与 GPT 的交互，包括存储对话记录和调用 GPT API"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             user_id = data.get('user_id')
             problem_id = data.get('problem_id')
-            message = data.get('message')
-            conversation_type = data.get('conversation_type')  # user 或 gpt
+            user_message = data.get('message')  # 用户输入的内容
+            conversation_type = "user"  # 用户的对话类型固定为 "user"
 
-            if not user_id or not problem_id or not message or not conversation_type:
+            if not user_id or not problem_id or not user_message:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             # 检查用户和题目是否存在
@@ -672,10 +678,6 @@ def save_gpt_conversation(request):
             if not Problem.objects.filter(id=problem_id).exists():
                 return JsonResponse({"error": "Invalid problem_id"}, status=400)
 
-            # 验证 conversation_type 是否有效
-            if conversation_type not in ['user', 'gpt']:
-                return JsonResponse({"error": "Invalid conversation_type"}, status=400)
-
             # 获取或创建会话
             session, created = ConversationSession.objects.get_or_create(
                 user_id=user_id,
@@ -683,14 +685,44 @@ def save_gpt_conversation(request):
                 is_resolved=False  # 默认未解决
             )
 
-            # 保存对话记录
+            # 保存用户的对话记录
             GptConversation.objects.create(
                 session=session,
-                message=message,
+                message=user_message,
                 conversation_type=conversation_type
             )
 
-            return JsonResponse({"message": "Conversation saved successfully"}, status=201)
+            # 调用 GPT API 获取回复
+            gpt_api_url = "https://api.openai.com/v1/chat/completions"  # 替换为你的 GPT API 地址
+            gpt_payload = {
+                "model": "gpt-4",  # 替换为你使用的模型
+                "messages": [
+                    {"role": "user", "content": user_message}
+                ]
+            }
+            gpt_headers = {
+                "Authorization": f"Bearer Ysk-proj-ELtVtnp4fpl5wYBsUb3c6vcSyqP4HC9bbF-fHjJ5VMLBmdJ5yDfVabp9_Evy3bCohbBb5o_vVUT3BlbkFJQttFIx3evX-yhrzrw-tstYzpUKV1zB2HyRdHhYE2I8gr4J-GgEbRUqD7H8Rd3IJdSCwEccRGcA",  # 替换为你的 GPT API 密钥
+                "Content-Type": "application/json"
+            }
+
+            try:
+                gpt_response = requests.post(gpt_api_url, json=gpt_payload, headers=gpt_headers)
+                gpt_response.raise_for_status()
+                gpt_reply = gpt_response.json()["choices"][0]["message"]["content"]
+            except requests.RequestException as e:
+                return JsonResponse({"error": f"Error calling GPT API: {str(e)}"}, status=500)
+
+            # 保存 GPT 的对话记录
+            GptConversation.objects.create(
+                session=session,
+                message=gpt_reply,
+                conversation_type="gpt"
+            )
+
+            return JsonResponse({
+                "message": "Interaction processed successfully",
+                "gpt_reply": gpt_reply
+            }, status=201)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
     return JsonResponse({"error": "Invalid request method"}, status=405)

@@ -12,15 +12,53 @@ const AIPanel: React.FC = () => {
         { sender: 'bot', text: 'Hello! How can I help you today?' },
     ]);
     const [input, setInput] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSend = () => {
-        if (!input.trim()) return;
-        setMessages(prev => [
-            ...prev,
-            { sender: 'user', text: input },
-            { sender: 'bot', text: 'This is a demo response.' },
-        ]);
-        setInput('');
+    // 发送消息并调用后端 API
+    const handleSend = async () => {
+        if (!input.trim() || loading) return;
+
+        // 先将用户的消息加入聊天记录
+        setMessages(prev => [...prev, { sender: 'user', text: input }]);
+        setLoading(true);
+
+        const payload = {
+            user_id: 1,
+            problem_id: 42,
+            message: input,
+        };
+
+        try {
+            const response = await fetch('http://localhost:8000/api/gpt_interaction/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!response.ok) {
+                // 如果返回错误，读取错误信息
+                const errorData = await response.json();
+                setMessages(prev => [
+                    ...prev,
+                    { sender: 'bot', text: `Error: ${errorData.error}` },
+                ]);
+            } else {
+                const data = await response.json();
+                // 将 GPT 返回的回复信息加入聊天记录
+                setMessages(prev => [
+                    ...prev,
+                    { sender: 'bot', text: data.gpt_reply },
+                ]);
+            }
+        } catch (error: any) {
+            // 网络或其他异常处理
+            setMessages(prev => [
+                ...prev,
+                { sender: 'bot', text: `Error: ${error.message}` },
+            ]);
+        } finally {
+            setLoading(false);
+            setInput('');
+        }
     };
 
     const handleClear = () => {
@@ -94,12 +132,18 @@ const AIPanel: React.FC = () => {
                     variant="outlined"
                     size="small"
                     value={input}
-                    onSubmit={handleSend}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            setInput("");
+                            handleSend();
+                        }
+                    }}
                 />
-                <Button variant="contained" sx={{ ml: 1 }} onClick={handleSend}>
-                    Send
+                <Button variant="contained" sx={{ ml: 1 }} onClick={(e) => {setInput("");handleSend()}} disabled={loading}>
+                    {loading ? 'Sending...' : 'Send'}
                 </Button>
             </Box>
         </Box>

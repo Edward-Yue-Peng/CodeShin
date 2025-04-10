@@ -64,7 +64,6 @@ function LoginPage() {
             });
 
             const text = await response.text();
-            console.log('Raw response text:', text);
             // 尝试解析 JSON 返回的数据
             const data = JSON.parse(text);
             if (!response.ok) {

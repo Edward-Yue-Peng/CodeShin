@@ -81,7 +81,7 @@ function Practice() {
         }
     };
 
-// 统一获取推荐题目列表，并更新题目（供下一题选择）
+    // 获取推荐题目列表，随后打开推荐题目选择对话框
     const handleNextProblem = async () => {
         try {
             const response = await fetch(`http://localhost:8000/api/get_recommendations/?user_id=${user?.userId}`);
@@ -119,10 +119,30 @@ function Practice() {
         setOpenSnackbar(false);
     };
 
-    // 新增：当 CodeEditor 中点击 TaskAltIcon 按钮时调用该回调
-    const handleTaskAltClick = () => {
-        console.log("TaskAltIcon clicked in CodeEditor - handled in Practice!");
-        // 这里可以继续增加其它逻辑
+    // 修改后的 TaskAltIcon 按钮点击处理函数：
+    // 1. 提交代码到 /api/submit_code/ 接口；
+    // 2. 如果提交成功，则切换到下一道题（展示推荐题目对话框供用户选择）。
+    const handleTaskAltClick = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/submit_code/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({user_id: 1,problem_id: 1,solution_code: "1",})
+            });
+            console.log("Will send:", JSON.stringify({user_id: 1,problem_id: 1,solution_code: "1",}));
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(errText);
+            }
+            const data = await response.json();
+            console.log("Submission successful:", data);
+            // 可在此处根据返回的 data 显示额外信息（例如得分、反馈等）
+            setOpenSnackbar(true);  // 提交成功后显示提示
+            // 切换到下一道题（这里调用 handleNextProblem 获取推荐题目）
+            await handleNextProblem();
+        } catch (error: any) {
+            alert("Submission failed: " + error.message);
+        }
     };
 
     // 布局相关状态
@@ -188,7 +208,7 @@ function Practice() {
                                 autoSaveCode={code}
                                 onCodeChange={setCode}
                                 onSave={handleSave}
-                                onTaskAltClick={handleTaskAltClick} // 将回调传递给 CodeEditor
+                                onTaskAltClick={handleTaskAltClick} // 将新的回调传递给 CodeEditor
                             />
                         </Suspense>
                     </Box>

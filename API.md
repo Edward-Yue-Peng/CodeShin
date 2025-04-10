@@ -39,7 +39,7 @@
             "error": "Missing required fields"
         }
         ```
-      或
+        或
         ```json
         {
             "error": "Username already exists"
@@ -69,8 +69,7 @@
     - 响应体:
         ```json
         {
-            "message": "Login successful",
-            "user_id": 1
+            "message": "Login successful"
         }
         ```
 - **失败**:
@@ -81,7 +80,7 @@
             "error": "Missing required fields"
         }
         ```
-      或
+        或
         ```json
         {
             "error": "Invalid credentials"
@@ -195,7 +194,8 @@
                 "dislikes": 321,
                 "rating": 4.2,
                 "similar_questions": "Two Sum, Four Sum"
-            }
+            },
+            // ... 更多题目
         ]
         ```
 - **失败**:
@@ -216,34 +216,23 @@
 
 ---
 
-## 代码管理系统
-
-### 1. 提交代码
-- **URL**: `/api/submit_code/`
-- **方法**: `POST`
-- **描述**: 提交用户的解题代码。
+### 2. 获取题目的难度
+- **URL**: `/api/problem_difficulty/`
+- **方法**: `GET`
+- **描述**: 获取题目的难度。
 
 #### 请求
-- **请求头**: `Content-Type: application/json`
-- **请求体**:
-    ```json
-    {
-        "user_id": 1,
-        "problem_id": 1,
-        "solution_code": "def two_sum(nums, target): ...",
-        "is_passed": true,
-        "submission_status": "Accepted"
-    }
-    ```
+- **请求头**: 无
+- **请求参数**:
+    - [id](http://_vscodecontentref_/2)：题目的 ID。
 
 #### 响应
 - **成功**:
-    - 状态码: `201 Created`
+    - 状态码: `200 OK`
     - 响应体:
         ```json
         {
-            "message": "Code submitted and scored successfully",
-            "version": 2
+            "problem_difficulty": string
         }
         ```
 - **失败**:
@@ -254,11 +243,90 @@
             "error": "Missing required fields"
         }
         ```
+
+## 代码管理系统
+
+### 1. 提交代码并打分
+- **URL**: `/api/submit_code/`
+- **方法**: `POST`
+- **描述**: 提交用户编写的解题代码，并使用 GPT 模型进行评估和打分。同时更新用户提交历史、掌握程度和触发推荐。
+
+#### 请求
+- **请求头**: `Content-Type: application/json`
+- **请求体**:
+    ```json
+    {
+        "user_id": integer,  // 用户的唯一标识符
+        "problem_id": integer,  // 题目的唯一标识符
+        "solution_code": string,  // 用户提交的解答代码
+        "is_passed": boolean,  // (可选，默认为 False) 指示代码是否通过了所有测试用例。
+                               // 这个字段的值可能会被 GPT 的评估结果覆盖或作为初始参考。
+        "submission_status": string  // (可选) 用户提交的状态，例如 "Accepted", "Failed", "Error" 等。
+    }
+    ```
+
+#### 响应
+- **成功**:
+    - 状态码: `201 Created`
+    - 响应体:
+        ```json
+        {
+            "message": "Code submitted and scored successfully",
+            "version": integer,  // 本次提交的代码版本号
+            "recommendations": array,  // 推荐的题目 ID 列表
+            "score": float or null,  // GPT 模型给出的代码评分 (0-1 之间)，可能为 null
+            "feedback": string  // GPT 模型对代码的反馈
+        }
+        ```
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing required fields"
+        }
+        ```
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid JSON format"
+        }
+        ```
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid user_id"
+        }
+        ```
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid problem_id"
+        }
+        ```
     - 状态码: `404 Not Found`
     - 响应体:
         ```json
         {
             "error": "No conversation session found"
+        }
+        ```
+    - 状态码: `500 Internal Server Error`
+    - 响应体:
+        ```json
+        {
+            "error": "..."  // 包含具体的错误信息
+        }
+        ```
+- **方法不允许**:
+    - 状态码: `405 Method Not Allowed`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid request method"
         }
         ```
 
@@ -563,7 +631,7 @@
             }
         }
         ```
-      **注意**如果从未做过这类题，掌握度缺省为-1.0。
+        **注意**如果从未做过这类题，掌握度缺省为-1.0。
 - **失败**:
     - 状态码: `400 Bad Request`
     - 响应体:
@@ -601,7 +669,7 @@
             "similar_questions": [295, 703, 1024]
         }
         ```
-      **注意**若无相似题目，返回空列表。
+        **注意**若无相似题目，返回空列表。
 - **失败**:
     - 状态码: `400 Bad Request`
     - 响应体:
@@ -650,8 +718,8 @@
             }
         }
         ```
-      **注意:** 难度级别映射：1 - Easy, 2 - Medium, 3 - Hard。
-      **注意:** 0表示对应为空。
+        **注意:** 难度级别映射：1 - Easy, 2 - Medium, 3 - Hard。
+        **注意:** 0表示对应为空。
 - **失败**:
     - 状态码: `400 Bad Request`
     - 响应体:
@@ -691,7 +759,7 @@
             "next topic": "linked list"
         }
         ```
-      **注意:** `topic index` 是从 1 开始的排序号。`previous topic` 和 `next topic` 可能为 `null`。
+        **注意:** `topic index` 是从 1 开始的排序号。`previous topic` 和 `next topic` 可能为 `null`。
 - **失败**:
     - 状态码: `400 Bad Request`
     - 响应体:
@@ -707,6 +775,84 @@
             "error": "Can't find this topic's index"
         }
         ```
+
+---
+
+## 设置推荐权重
+
+### 1、设置用户推荐权重 API
+
+- **URL**: `/api/set_recommendation_weights/`
+- **方法**: `POST`
+- **描述**: 允许用户设置推荐算法中不同因素的权重。
+
+#### 请求
+
+- **请求头**: `Content-Type: application/json`
+- **请求体**:
+    ```json
+    {
+        "user_id": 1,
+        "similarity_weight": 0.8,
+        "common_topics_weight": 0.5,
+        "difficulty_weight": 0.7
+    }
+    ```
+    - `user_id` (integer, required): 需要设置权重的用户的 ID。
+    - `similarity_weight` (float, required): 相似性得分的权重。
+    - `common_topics_weight` (float, required): 共同话题得分的权重。
+    - `difficulty_weight` (float, required): 难度匹配得分的权重。
+
+#### 响应
+
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "message": "Recommendation weights updated successfully"
+        }
+        ```
+
+- **失败**:
+    - **状态码**: `400 Bad Request`
+        - **响应体**:
+            ```json
+            {
+                "error": "Missing required fields (user_id, similarity_weight, common_topics_weight, difficulty_weight)"
+            }
+            ```
+            - 说明: 请求体中缺少必要的权重字段或 `user_id`。
+        - **响应体**:
+            ```json
+            {
+                "error": "Invalid JSON format"
+            }
+            ```
+            - 说明: 请求体不是有效的 JSON 格式。
+        - **响应体**:
+            ```json
+            {
+                "error": "Invalid user_id"
+            }
+            ```
+            - 说明: 提供的 `user_id` 在数据库中不存在。
+    - **状态码**: `405 Method Not Allowed`
+        - **响应体**:
+            ```json
+            {
+                "error": "Invalid request method"
+            }
+            ```
+            - 说明: 请求方法不是 `POST`。
+    - **状态码**: `500 Internal Server Error`
+        - **响应体**:
+            ```json
+            {
+                "error": "..."
+            }
+            ```
+            - 说明: 服务器内部错误，错误信息会包含在 `error` 字段中。
 
 ## 推荐题号的写和读
 
@@ -836,47 +982,87 @@
 
 ---
 
-### 2. 存储用户与 GPT 的对话记录
-- **URL**: `/api/save_gpt_conversation/`
+### 2. 用户与 GPT 交互 API
+
+- **URL**: `/api/gpt_interaction/` (假设你的 URL 配置将 `gpt_interaction_api` 映射到此路径)
 - **方法**: `POST`
-- **描述**: 存储用户与 GPT 的对话记录。
+- **描述**: 处理用户与 GPT 的交互，包括接收用户消息、存储对话记录、读取记忆、调用 GPT API 获取回复，并存储 GPT 的回复。
 
 #### 请求
+
 - **请求头**: `Content-Type: application/json`
 - **请求体**:
     ```json
     {
         "user_id": 1,
         "problem_id": 42,
-        "message": "How do I solve this problem?",
-        "conversation_type": "user"
+        "message": "Explain the time complexity of this algorithm."
     }
     ```
+    - `user_id` (integer, required): 发送消息的用户的 ID。
+    - `problem_id` (integer, required): 当前正在讨论的问题的 ID。
+    - `message` (string, required): 用户发送给 GPT 的消息内容。
 
 #### 响应
+
 - **成功**:
     - 状态码: `201 Created`
     - 响应体:
         ```json
         {
-            "message": "Conversation saved successfully"
+            "message": "Interaction processed successfully",
+            "gpt_reply": "The time complexity of this algorithm is O(n log n) because..."
         }
         ```
+        - `message`: 操作成功的消息。
+        - `gpt_reply`: GPT 模型返回的回复内容。
+
 - **失败**:
-    - 状态码: `400 Bad Request`
-    - 响应体:
-        ```json
-        {
-            "error": "Missing required fields"
-        }
-        ```
-    - 状态码: `404 Not Found`
-    - 响应体:
-        ```json
-        {
-            "error": "Invalid user_id or problem_id"
-        }
-        ```
+    - **状态码**: `400 Bad Request`
+        - **响应体**:
+            ```json
+            {
+                "error": "Missing required fields"
+            }
+            ```
+            - 说明: 请求体中缺少 `user_id`, `problem_id`, 或 `message` 字段。
+        - **响应体**:
+            ```json
+            {
+                "error": "Invalid JSON format"
+            }
+            ```
+            - 说明: 请求体不是有效的 JSON 格式。
+        - **响应体**:
+            ```json
+            {
+                "error": "Invalid user_id"
+            }
+            ```
+            - 说明: 提供的 `user_id` 在数据库中不存在。
+        - **响应体**:
+            ```json
+            {
+                "error": "Invalid problem_id"
+            }
+            ```
+            - 说明: 提供的 `problem_id` 在数据库中不存在。
+    - **状态码**: `405 Method Not Allowed`
+        - **响应体**:
+            ```json
+            {
+                "error": "Invalid request method"
+            }
+            ```
+            - 说明: 请求方法不是 `POST`。
+    - **状态码**: `500 Internal Server Error`
+        - **响应体**:
+            ```json
+            {
+                "error": "Error calling GPT API: ..."
+            }
+            ```
+            - 说明: 调用 OpenAI GPT API 时发生错误，错误信息会包含在 `error` 字段中。
 
 ---
 
@@ -958,39 +1144,6 @@
         ```json
         {
             "error": "Missing user_id or problem_id"
-        }
-        ```
-### 5. 返回并存储代码分析结果
-- **URL**: `/api/set_code_analysis/`
-- **方法**: `POST`
-- **描述**: 返回gpt给的文字feedback和对用户在此题相关知识点上的评分
-
-#### 请求
-- **请求头**: `Content-Type: application/json`
-- **请求体**:
-    ```json
-    {
-    "passed": "Yes" or "No"
-    "Feedback": "You have good grasp of ....but...."
-    "Ratings of related topics": {"array": 1, "linked list": 2} 
-}
-    ```
-
-#### 响应
-- **成功**:
-    - 状态码: `200 OK`
-    - 响应体:
-        ```json
-        {
-            "message": "Analysis saved successfully"
-        }
-        ```
-- **失败**:
-    - 状态码: `400 Bad Request`
-    - 响应体:
-        ```json
-        {
-            "error": "Missing required fields"
         }
         ```
 

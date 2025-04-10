@@ -5,11 +5,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator, EmptyPage
+from django.conf import settings
 from .models import (
     Problem, UserHistory, AutosaveCode, UserTopicMastery, Recommendation,
-    GptConversation, ConversationSession, Topic, TopicProblem
+    GptConversation, ConversationSession, Topic, TopicProblem, UserRecommendationWeight
 )
-from .utils import initialize_user_topics, gpt_score, recommender
+from .utils import initialize_user_topics, recommender
 import json
 import requests
 from .constants import ALL_TOPICS
@@ -61,7 +62,7 @@ def user_login(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return JsonResponse({'message': 'Login successful', 'userid': user.id}, status=200)
+            return JsonResponse({'message': 'Login successful'}, status=200)
         else:
             return JsonResponse({'error': 'Invalid credentials'}, status=400)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
@@ -133,6 +134,22 @@ def get_problems(request):
             return JsonResponse(problem_list, safe=False, status=200)
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+
+@csrf_exempt
+def get_problem_difficulty(request):
+    """获取题目的难度"""
+    if request.method == 'GET':
+        problem_id = request.GET.get('problem_id')
+        if not problem_id:
+            return JsonResponse({"error": "Missing problem_id"}, status=400)
+
+        try:
+            problem = Problem.objects.get(id=problem_id)
+            return JsonResponse({"problem_difficulty": problem.difficulty}, status=200)
+        except Problem.DoesNotExist:
+            return JsonResponse({"error": f"Problem with ID {problem_id} does not exist"}, status=404)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
 # 代码管理系统
 
 @csrf_exempt
@@ -163,49 +180,53 @@ def submit_code(request):
             latest_submission = UserHistory.objects.filter(user_id=user, problem_id=problem).order_by('-version').first()
             new_version = (latest_submission.version + 1) if latest_submission else 1
 
+            # 调用 GPT 打分系统
+            from .utils import evaluate_code_with_gpt, parse_feedback
+            description = problem.description
+            history = "\n".join([c.message for c in GptConversation.objects.filter(session__user_id=user, session__problem_id=problem)])
+            related_topics = [topic.name for topic in problem.related_topics.all()]
+            gpt_response = evaluate_code_with_gpt(description, solution_code, history, related_topics)
+            feedback_data = parse_feedback(gpt_response)
+
+            # 提取 GPT 返回的数据
+            passed = feedback_data.get("Passed", "No") == "Yes"
+            feedback = feedback_data.get("Feedback", "")
+            ratings = feedback_data.get("Ratings of related topics", {})
+            score = feedback_data.get("score", None)
+
+            # 更新用户的掌握程度
+            for topic, mastery_level in ratings.items():
+                UserTopicMastery.objects.update_or_create(
+                    user_id=user,
+                    topic_name=topic,
+                    defaults={"mastery_level": mastery_level}
+                )
+
             # 保存用户提交记录
             UserHistory.objects.create(
                 user_id=user,
                 problem_id=problem,
                 solution_code=solution_code,
                 version=new_version,
-                is_passed=is_passed,
-                submission_status=submission_status
+                is_passed=passed,
+                submission_status=submission_status,
+                score=score,
+                feedback=feedback
             )
 
             # 清除 autosave_codes 表中的记录
             AutosaveCode.objects.filter(user_id=user, problem_id=problem).delete()
 
-            # 获取 GPT 对话记录
-            session = ConversationSession.objects.filter(user_id=user, problem_id=problem).first()
-            if not session:
-                return JsonResponse({"error": "No conversation session found"}, status=404)
-
-            conversations = session.conversations.all()
-            conversation_text = "\n".join([c.message for c in conversations])
-
-            # 获取题目的 related_topics
-            related_topics = [topic.name for topic in problem.related_topics.all()] if problem else []
-
-            # 调用 GPT API 进行打分（假设有一个函数 gpt_score）
-            topic_scores = gpt_score(solution_code, conversation_text, related_topics)
-
-            # 更新用户的掌握程度
-            for topic, score in topic_scores.items():
-                UserTopicMastery.objects.update_or_create(
-                    user_id=user.id,
-                    topic_name=topic,
-                    defaults={"mastery_level": score}
-                )
-
             # **调用推荐系统逻辑**
             recommendations = recommender(user.id)  # 调用推荐系统函数
 
-            # 返回响应，包括推荐结果
+            # 返回响应，包括推荐结果和 GPT 反馈
             return JsonResponse({
                 "message": "Code submitted and scored successfully",
                 "version": new_version,
-                "recommendations": recommendations  # 将推荐结果返回给用户
+                "recommendations": recommendations,  # 将推荐结果返回给用户
+                "score": score,  # 返回 GPT 评分
+                "feedback": feedback  # 返回 GPT 反馈
             }, status=201)
 
         except json.JSONDecodeError:
@@ -559,6 +580,44 @@ def get_topic_index(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+# 设置推荐权重
+
+@csrf_exempt
+def set_recommendation_weights_api(request):
+    """允许用户设置推荐算法的权重"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')
+            similarity_weight = data.get('similarity_weight')
+            common_topics_weight = data.get('common_topics_weight')
+            difficulty_weight = data.get('difficulty_weight')
+
+            if not user_id or similarity_weight is None or common_topics_weight is None or difficulty_weight is None:
+                return JsonResponse({"error": "Missing required fields (user_id, similarity_weight, common_topics_weight, difficulty_weight)"}, status=400)
+
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return JsonResponse({"error": "Invalid user_id"}, status=400)
+
+            # 尝试获取已存在的权重设置，如果不存在则创建
+            weights, created = UserRecommendationWeight.objects.update_or_create(
+                user=user,
+                defaults={
+                    'similarity_weight': similarity_weight,
+                    'common_topics_weight': common_topics_weight,
+                    'difficulty_weight': difficulty_weight,
+                }
+            )
+
+            return JsonResponse({"message": "Recommendation weights updated successfully"}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 # 推荐题号的写和读
 
@@ -660,29 +719,33 @@ def create_conversation_session(request):
 
 @csrf_exempt
 def gpt_interaction_api(request):
-    """处理用户与 GPT 的交互，包括存储对话记录和调用 GPT API"""
+    """处理用户与 GPT 的交互，包括存储对话记录、读取记忆和调用 GPT API"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             user_id = data.get('user_id')
             problem_id = data.get('problem_id')
-            user_message = data.get('message')  # 用户输入的内容
-            conversation_type = "user"  # 用户的对话类型固定为 "user"
+            user_message = data.get('message')
+            conversation_type = "user"
 
             if not user_id or not problem_id or not user_message:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             # 检查用户和题目是否存在
-            if not User.objects.filter(id=user_id).exists():
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
                 return JsonResponse({"error": "Invalid user_id"}, status=400)
-            if not Problem.objects.filter(id=problem_id).exists():
+            try:
+                problem = Problem.objects.get(id=problem_id)
+            except Problem.DoesNotExist:
                 return JsonResponse({"error": "Invalid problem_id"}, status=400)
 
             # 获取或创建会话
             session, created = ConversationSession.objects.get_or_create(
-                user_id=user_id,
-                problem_id=problem_id,
-                is_resolved=False  # 默认未解决
+                user_id=user,
+                problem_id=problem,
+                is_resolved=False
             )
 
             # 保存用户的对话记录
@@ -692,16 +755,24 @@ def gpt_interaction_api(request):
                 conversation_type=conversation_type
             )
 
+            # 读取当前会话的记忆 (之前的对话记录)
+            previous_conversations = GptConversation.objects.filter(session=session).order_by('timestamp')
+            messages = []
+            for conv in previous_conversations:
+                role = "user" if conv.conversation_type == "user" else "assistant"
+                messages.append({"role": role, "content": conv.message})
+
+            # 将最新的用户消息添加到对话历史中
+            messages.append({"role": "user", "content": user_message})
+
             # 调用 GPT API 获取回复
-            gpt_api_url = "https://api.openai.com/v1/chat/completions"  # 替换为你的 GPT API 地址
+            gpt_api_url = "https://api.openai.com/v1/chat/completions"
             gpt_payload = {
-                "model": "gpt-4",  # 替换为你使用的模型
-                "messages": [
-                    {"role": "user", "content": user_message}
-                ]
+                "model": settings.GPT_MODEL,
+                "messages": messages
             }
             gpt_headers = {
-                "Authorization": f"Bearer Ysk-proj-ELtVtnp4fpl5wYBsUb3c6vcSyqP4HC9bbF-fHjJ5VMLBmdJ5yDfVabp9_Evy3bCohbBb5o_vVUT3BlbkFJQttFIx3evX-yhrzrw-tstYzpUKV1zB2HyRdHhYE2I8gr4J-GgEbRUqD7H8Rd3IJdSCwEccRGcA",  # 替换为你的 GPT API 密钥
+                "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
                 "Content-Type": "application/json"
             }
 
@@ -709,20 +780,22 @@ def gpt_interaction_api(request):
                 gpt_response = requests.post(gpt_api_url, json=gpt_payload, headers=gpt_headers)
                 gpt_response.raise_for_status()
                 gpt_reply = gpt_response.json()["choices"][0]["message"]["content"]
+
+                # 保存 GPT 的对话记录
+                GptConversation.objects.create(
+                    session=session,
+                    message=gpt_reply,
+                    conversation_type="gpt"
+                )
+
+                return JsonResponse({
+                    "message": "Interaction processed successfully",
+                    "gpt_reply": gpt_reply
+                }, status=201)
+
             except requests.RequestException as e:
                 return JsonResponse({"error": f"Error calling GPT API: {str(e)}"}, status=500)
 
-            # 保存 GPT 的对话记录
-            GptConversation.objects.create(
-                session=session,
-                message=gpt_reply,
-                conversation_type="gpt"
-            )
-
-            return JsonResponse({
-                "message": "Interaction processed successfully",
-                "gpt_reply": gpt_reply
-            }, status=201)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
     return JsonResponse({"error": "Invalid request method"}, status=405)

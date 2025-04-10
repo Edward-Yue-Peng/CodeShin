@@ -31,7 +31,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'corsheaders',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -42,8 +41,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -81,8 +78,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "yuan_database",
-        "USER": "yuanshen",
-        "PASSWORD": "yuanshenqidong",
+        "USER": "yuan_user",
+        "PASSWORD": "yuanshen_qidong",
         "HOST": "localhost",  # 或者数据库服务器的IP地址
         "PORT": "3306",  # MySQL默认端口
         "OPTIONS": {
@@ -133,4 +130,10 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
+# OpenAI API 密钥和模型配置
+
+OPENAI_API_KEY = "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"  # 替换为你的实际密钥
+GPT_MODEL = "gpt-4"
+
+# 基础 URL
+BASE_URL = "http://127.0.0.1:8000/"  # 替换为实际域名或 IP 地址

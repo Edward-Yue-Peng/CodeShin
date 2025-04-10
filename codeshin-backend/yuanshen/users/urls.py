@@ -4,6 +4,7 @@ from .views import (
     user_login,
     user_logout,
     get_problems,
+    get_problem_difficulty,
     submit_code,
     autosave_code,
     get_progress_and_code,
@@ -16,13 +17,13 @@ from .views import (
     get_similar_questions_api,
     get_topic_difficulty_bucket,
     get_topic_index, 
+    set_recommendation_weights_api,
     set_recommendations,
     get_recommendations,
     create_conversation_session,
     gpt_interaction_api,
     get_gpt_conversations,
-    clear_gpt_conversations,
-    recommender
+    clear_gpt_conversations
 )
 
 urlpatterns = [
@@ -33,6 +34,9 @@ urlpatterns = [
 
     # 题目管理系统
     path('problems/', get_problems, name='get_problems'),  # 获取题目数据
+    path('problem_difficulty/', get_problem_difficulty, name='get_problem_difficulty'),
+
+    # 代码管理系统
     path('submit_code/', submit_code, name='submit_code'),  # 提交代码
     path('autosave_code/', autosave_code, name='autosave_code'),  # 自动保存代码
     path('get_progress_and_code/', get_progress_and_code, name='get_progress_and_code'),  # 获取用户当前进度和代码
@@ -50,7 +54,7 @@ urlpatterns = [
     path('topics_difficulty_bucket/', get_topic_difficulty_bucket, name='get_topic_difficulty_bucket'),  # 获取某个知识点对应的不同难度的题目ID
     path('topics_index/', get_topic_index, name='get_topic_index'),  # 获取某个知识点的排序号
 
-    path('recommender/<int:user_id>/', recommender, name='recommender'),  # 推荐系统的视图函数
+    path('set_recommendation_weights/', set_recommendation_weights_api, name='set_recommendation_weights_api'),  # 设置推荐权重
 
     path('set_recommendations/', set_recommendations, name='set_recommendations'),  # 存储推荐题目
     path('get_recommendations/', get_recommendations, name='get_recommendations'),  # 读取推荐题目

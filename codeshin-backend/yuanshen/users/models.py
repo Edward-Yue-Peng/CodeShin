@@ -69,6 +69,8 @@ class UserHistory(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)  # 提交时间
     is_passed = models.BooleanField(default=False)  # 是否通过
     submission_status = models.CharField(max_length=50, null=True, blank=True)  # 提交状态（如 Accepted, Wrong Answer）
+    score = models.FloatField(null=True, blank=True)  # 本次提交的总评分（0-1）
+    feedback = models.TextField(null=True, blank=True)  # GPT 生成的反馈内容
 
     class Meta:
         db_table = 'user_history'  # 数据库表名
@@ -174,3 +176,20 @@ class Recommendation(models.Model):
 
     def __str__(self):
         return f"{self.user_id.username} - Recommendations"
+    
+
+# 推荐权重模型
+class UserRecommendationWeight(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True, related_name='recommendation_weights')
+    similarity_weight = models.FloatField(default=1.0)
+    common_topics_weight = models.FloatField(default=1.0)
+    difficulty_weight = models.FloatField(default=1.0)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_recommendation_weights'
+        verbose_name = 'User Recommendation Weight'
+        verbose_name_plural = 'User Recommendation Weights'
+
+    def __str__(self):
+        return f"{self.user.username}'s Recommendation Weights"

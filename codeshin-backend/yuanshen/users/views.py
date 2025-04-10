@@ -62,7 +62,7 @@ def user_login(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return JsonResponse({'message': 'Login successful'}, status=200)
+            return JsonResponse({'message': 'Login successful', 'userid': user.id}, status=200)
         else:
             return JsonResponse({'error': 'Invalid credentials'}, status=400)
     return JsonResponse({'error': 'Invalid request method'}, status=405)

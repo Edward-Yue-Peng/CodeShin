@@ -11,7 +11,7 @@ BASE_URL = settings.BASE_URL
 
 # 初始化 OpenAI 客户端
 model = settings.MODEL
-client = OpenAI(api_key=settings.API_KEY,base_url=settings.BASE_URL)
+client = OpenAI(api_key=settings.API_KEY, base_url="https://api.openai.com/v1")
 
 # 初始化用户主题掌握记录
 

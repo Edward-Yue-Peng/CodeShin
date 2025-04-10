@@ -27,3 +27,4 @@ media/
 # System files
 .DS_Store
 Thumbs.db
+/yuanshen/yuanshen/key.json

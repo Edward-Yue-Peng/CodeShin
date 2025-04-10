@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os.path
 from pathlib import Path
+from json import loads
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,6 +43,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -78,8 +82,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "yuan_database",
-        "USER": "yuan_user",
-        "PASSWORD": "yuanshen_qidong",
+        "USER": "yuanshen",
+        "PASSWORD": "yuanshenqidong",
         "HOST": "localhost",  # 或者数据库服务器的IP地址
         "PORT": "3306",  # MySQL默认端口
         "OPTIONS": {
@@ -119,6 +123,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -131,9 +136,11 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # OpenAI API 密钥和模型配置
+credentials=loads(open(f"{os.path.dirname(os.path.realpath(__file__))}/key.json", "r").read())
 
-OPENAI_API_KEY = "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"  # 替换为你的实际密钥
-GPT_MODEL = "gpt-4"
+API_KEY = credentials["api_key"]
+MODEL = credentials["model"]
+URL = credentials["base_url"]
 
 # 基础 URL
 BASE_URL = "http://127.0.0.1:8000/"  # 替换为实际域名或 IP 地址

@@ -10,9 +10,8 @@ import json
 BASE_URL = settings.BASE_URL
 
 # 初始化 OpenAI 客户端
-api_key = settings.OPENAI_API_KEY
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
-1
+model = settings.MODEL
+client = OpenAI(api_key=settings.API_KEY,base_url=settings.BASE_URL)
 
 # 初始化用户主题掌握记录
 
@@ -75,7 +74,7 @@ Please return only a valid JSON string. Do not include any markdown, explanation
 
     try:
         response = client.chat.completions.create(
-        model="gpt-4",
+        model=model,
         messages=[{"role": msg["role"], "content": msg["content"]} for msg in prompts],
         max_tokens=4096,
         temperature=0.7)

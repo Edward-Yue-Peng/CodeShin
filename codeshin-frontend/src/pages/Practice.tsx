@@ -22,6 +22,7 @@ import { UserContext } from '../context/UserContext';
 
 const CodeEditor = lazy(() => import('../components/CodeEditor'));
 const AIPanel = lazy(() => import('../components/AIPanel'));
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 function Practice() {
     const { user } = useContext(UserContext);
@@ -36,7 +37,7 @@ function Practice() {
     // 初始获取用户进度、代码和题目
     const fetchData = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/get_progress_and_code/?user_id=${user?.userId}`, {
+            const response = await fetch(`${apiUrl}/api/get_progress_and_code/?user_id=${user?.userId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -62,7 +63,7 @@ function Practice() {
 
     const handleSave = async (currentCode: string) => {
         try {
-            const response = await fetch('http://localhost:8000/api/autosave_code/', {
+            const response = await fetch(`${apiUrl}/api/autosave_code/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -84,7 +85,7 @@ function Practice() {
     // 获取推荐题目列表，随后打开推荐题目选择对话框
     const handleNextProblem = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/get_recommendations/?user_id=${user?.userId}`);
+            const response = await fetch(`${apiUrl}/api/get_recommendations/?user_id=${user?.userId}`);
             if (!response.ok) {
                 const errText = await response.text();
                 throw new Error(errText);
@@ -100,7 +101,7 @@ function Practice() {
     // 用户在推荐对话框中选择题目后，更新题目和代码
     const handleRecommendationSelect = async (selectedId: number) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/problems/?id=${selectedId}`);
+            const response = await fetch(`${apiUrl}/api/problems/?id=${selectedId}`);
             if (!response.ok) {
                 const errText = await response.text();
                 throw new Error(errText);
@@ -124,7 +125,7 @@ function Practice() {
     // 2. 如果提交成功，则切换到下一道题（展示推荐题目对话框供用户选择）。
     const handleTaskAltClick = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/submit_code/', {
+            const response = await fetch(`${apiUrl}/api/submit_code/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({user_id: 1,problem_id: 1,solution_code: "1",})

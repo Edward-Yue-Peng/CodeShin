@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { TextField, Button } from '@mui/material';
 import './LoginPage.css';
-
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 function RegisterPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -43,7 +43,7 @@ function RegisterPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8000/api/register/', {
+            const response = await fetch(`${apiUrl}/api/register/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

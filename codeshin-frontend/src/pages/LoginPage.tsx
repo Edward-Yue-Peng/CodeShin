@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button } from '@mui/material';
 import './LoginPage.css';
-
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 // 引入 UserContext
 import { UserContext } from '../context/UserContext';
 
@@ -55,7 +55,7 @@ function LoginPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8000/api/login/', {
+            const response = await fetch(`${apiUrl}/api/login/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

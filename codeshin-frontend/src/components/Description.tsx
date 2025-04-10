@@ -3,7 +3,7 @@ import { Box, Typography, Paper, Divider, useTheme } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 interface ProblemData {
     id: number;
     title: string;
@@ -36,7 +36,7 @@ const Description: React.FC<DescriptionProps> = ({problemID}) => {
         if (!problemID) return;
         async function fetchProblem() {
             try {
-                const response = await fetch(`http://localhost:8000/api/problems/?id=${problemID}`);
+                const response = await fetch(`${apiUrl}/api/problems/?id=${problemID}`);
                 if (!response.ok) {
                     const errText = await response.text();
                     throw new Error(errText);

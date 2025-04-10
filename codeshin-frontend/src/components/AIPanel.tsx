@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 const AIPanel: React.FC = () => {
     const theme = useTheme();
     // 根据当前模式决定 bot 消息气泡的背景色
@@ -29,7 +29,7 @@ const AIPanel: React.FC = () => {
         };
 
         try {
-            const response = await fetch('http://localhost:8000/api/gpt_interaction/', {
+            const response = await fetch(`${apiUrl}/api/gpt_interaction/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),

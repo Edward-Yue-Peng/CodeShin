@@ -19,7 +19,7 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import {UserContext} from "../context/UserContext";
-
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 interface NavBarProps {
     onToggleAIPanel: () => void;
     pages: string[];
@@ -43,7 +43,7 @@ const NavBar: React.FC<NavBarProps> = ({
 
     const handleLogout = async () => {
         try {
-            const res = await fetch('http://localhost:8000/api/logout/', {
+            const res = await fetch(`${apiUrl}/api/logout/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

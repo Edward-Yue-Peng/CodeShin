@@ -26,7 +26,7 @@ def initialize_user_topics(user):
 
 
 # 实现评价系统
-
+import traceback
 def evaluate_code_with_gpt(description,user_code, history, related_topics):
     prompts= [{
   "role": "system",
@@ -80,13 +80,30 @@ Please return only a valid JSON string. Do not include any markdown, explanation
         temperature=0.7)
         return response.choices[0].message.content
     except Exception as e:
-        return f"[错误] 调用 OpenAI API 失败: {e}"
+        print("Exception in interaction():", e)
+        traceback.print_exc()
+
+        # 返回 JSON 字符串，统一结构
+        return json.dumps({
+            "error": True,
+            "message": str(e),
+            "traceback": traceback.format_exc()
+        })
 
 
 def parse_feedback(gpt_response):
     """
-    解析 GPT 返回的 JSON 格式反馈。
+    解析 GPT 返回的 JSON 格式反馈，并处理常见错误格式。
     """
+    # ✅ 如果 gpt_response 本身是 JSON 错误格式，提前拦截
+    try:
+        parsed = json.loads(gpt_response)
+        if isinstance(parsed, dict) and parsed.get("error"):
+            raise ValueError(f"GPT error: {parsed['message']}")
+    except json.JSONDecodeError:
+        pass  # 不是 JSON 字符串，继续向下尝试提取 JSON 段
+
+    # ✅ 正则提取大括号包裹的 JSON 内容
     match = re.search(r"{.*}", gpt_response, re.DOTALL)
     if not match:
         raise ValueError("No JSON object found in response.")
@@ -94,7 +111,7 @@ def parse_feedback(gpt_response):
     json_text = match.group(0)
     cleaned_text = json_text.replace("\n", "\\n").replace("\r", "\\r")
 
-    print(f"Raw cleaned_text: {repr(cleaned_text)}")  # 打印原始表示
+    print(f"📦 Raw cleaned_text: {repr(cleaned_text)}")
 
     try:
         return json.loads(cleaned_text)

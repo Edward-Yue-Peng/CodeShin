@@ -163,7 +163,7 @@ def submit_code(request):
             solution_code = data.get('solution_code')
             is_passed = data.get('is_passed', False)  # 是否通过，默认为 False
             submission_status = data.get('submission_status', None)  # 提交状态
-
+            print(f"solution_code: {solution_code}")
             if not user_id_from_request or not problem_id_from_request or not solution_code:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
@@ -187,7 +187,6 @@ def submit_code(request):
             related_topics = [topic.name for topic in problem.related_topics.all()]
             gpt_response = evaluate_code_with_gpt(description, solution_code, history, related_topics)
             feedback_data = parse_feedback(gpt_response)
-
             # 提取 GPT 返回的数据
             passed = feedback_data.get("Passed", "No") == "Yes"
             feedback = feedback_data.get("Feedback", "")
@@ -626,13 +625,12 @@ def set_recommendations(request):
     """写入推荐题目"""
     if request.method == 'POST':
         try:
+            print("Raw request body:", request.body)
             data = json.loads(request.body)
             user_id = data.get('user_id')
             recommended_problems = data.get('recommended_problems')  # 推荐题目列表
-
-            if not user_id or not recommended_problems:
+            if user_id is None or recommended_problems is None:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
-
             # 检查用户是否存在
             if not User.objects.filter(id=user_id).exists():
                 return JsonResponse({"error": "Invalid user_id"}, status=400)

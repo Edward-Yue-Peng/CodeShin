@@ -31,6 +31,8 @@ function Practice() {
     const [problemID, setProblemID] = useState<number>(0);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [recommendedProblems, setRecommendedProblems] = useState<number[]>([]);
+    const [feedback, setFeedback] = useState<string>("");
+    const [score, setScore] = useState<number>(-1);
     const [openRecommendations, setOpenRecommendations] = useState(false);
     const [openFeedback, setOpenFeedback] = useState(false);
 
@@ -82,21 +84,6 @@ function Practice() {
         }
     };
 
-    // 获取推荐题目列表，随后打开推荐题目选择对话框
-    const handleNextProblem = async () => {
-        try {
-            const response = await fetch(`${apiUrl}/api/get_recommendations/?user_id=${user?.userId}`);
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(errText);
-            }
-            const data = await response.json();
-            setRecommendedProblems(data.recommended_problems || []);
-            setOpenRecommendations(true);
-        } catch (error: any) {
-            alert('Failed to get recommendations: ' + error.message);
-        }
-    };
 
     // 用户在推荐对话框中选择题目后，更新题目和代码
     const handleRecommendationSelect = async (selectedId: number) => {
@@ -120,27 +107,24 @@ function Practice() {
         setOpenSnackbar(false);
     };
 
-    // 修改后的 TaskAltIcon 按钮点击处理函数：
-    // 1. 提交代码到 /api/submit_code/ 接口；
-    // 2. 如果提交成功，则切换到下一道题（展示推荐题目对话框供用户选择）。
-    const handleTaskAltClick = async () => {
+    const handleSubmit = async () => {
         try {
             const response = await fetch(`${apiUrl}/api/submit_code/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({user_id: 1,problem_id: 1,solution_code: "1",})
+                body: JSON.stringify({user_id: user?.userId,problem_id: problemID,solution_code: code,})
             });
-            console.log("Will send:", JSON.stringify({user_id: 1,problem_id: 1,solution_code: "1",}));
             if (!response.ok) {
                 const errText = await response.text();
                 throw new Error(errText);
             }
+
             const data = await response.json();
-            console.log("Submission successful:", data);
-            // 可在此处根据返回的 data 显示额外信息（例如得分、反馈等）
-            setOpenSnackbar(true);  // 提交成功后显示提示
-            // 切换到下一道题（这里调用 handleNextProblem 获取推荐题目）
-            await handleNextProblem();
+            console.log("Submission result:", data);
+            setRecommendedProblems(data.recommendations || []);
+            setFeedback(data.feedback || '');
+            setScore(data.score);
+            setOpenFeedback(true);
         } catch (error: any) {
             alert("Submission failed: " + error.message);
         }
@@ -209,7 +193,7 @@ function Practice() {
                                 autoSaveCode={code}
                                 onCodeChange={setCode}
                                 onSave={handleSave}
-                                onTaskAltClick={handleTaskAltClick} // 将新的回调传递给 CodeEditor
+                                onTaskAltClick={handleSubmit} // 将新的回调传递给 CodeEditor
                             />
                         </Suspense>
                     </Box>
@@ -254,21 +238,18 @@ function Practice() {
                 </DialogTitle>
                 <DialogContent dividers>
                     <Typography variant="body1" color="text.secondary" gutterBottom>
-                        Overall, your merge sort implementation looks solid!
+                        {feedback}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Strengths:</strong> Your code is well-structured and correctly implements merge sort.
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        <strong>Areas for Improvement:</strong> Consider optimizing the merge process for large datasets.
+                        <strong>The score you gained: </strong> {score}
                     </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button
                         variant="outlined"
                         onClick={async () => {
-                            await handleNextProblem();
                             setOpenFeedback(false);
+                            setOpenRecommendations(true)
                         }}
                     >
                         Next Problem

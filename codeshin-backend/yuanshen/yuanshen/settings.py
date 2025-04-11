@@ -143,4 +143,4 @@ MODEL = credentials["model"]
 URL = credentials["base_url"]
 
 # 基础 URL
-BASE_URL = "http://127.0.0.1:8000/"  # 替换为实际域名或 IP 地址
+BASE_URL = "http://127.0.0.1:8000"  # 替换为实际域名或 IP 地址

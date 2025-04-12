@@ -7,7 +7,7 @@ CODESHIN is an AI-powered coding platform that provides an interactive environme
 ### Windows 
 下载：https://dev.mysql.com/downloads/installer/
 
-安装时勾选 MySQL Server 和 MySQL Workbench（图形界面可选）。
+安装时勾选 MySQL Server 8.0.11以上的版本。
 
 进入MySQL Installer，点击Reconfigure，设置 root 密码。
 
@@ -30,9 +30,9 @@ mysql -u root
 ### 创建虚拟环境并安装依赖
 ```bash
 cd codeshin-backend
+python -m venv .venv
 source .venv/bin/activate  
 # Windows 用 .venv\Scripts\activate
-python -m venv .venv
 pip install -r requirements.txt
 ```
 在IDE中切换到刚刚创建的venv
@@ -64,6 +64,9 @@ CREATE USER 'yuanshen'@'localhost' IDENTIFIED BY 'yuanshenqidong';
 GRANT ALL PRIVILEGES ON yuan_database.* TO 'yuanshen'@'localhost';
 FLUSH PRIVILEGES;
 ```
+### 导入密钥
+将key.json文件存入`codeshin-backend/yuanshen/`目录下。
+
 ### 初始化数据库
 ```bash
 python manage.py makemigrations
@@ -72,7 +75,7 @@ python manage.py migrate
 ### 导入问题
 ```bash
 python import_questions.py
-python import_by_topic.py
+python import_by_topics.py
 ```
 ### 启动后端服务
 ```bash
@@ -88,6 +91,6 @@ npm install
 ```
 启动前端服务
 ```bash
-npm start
+npm run dev
 ``` 
 

@@ -203,23 +203,19 @@ def recommender(user_id,cur_pid):
     mastery_map = api_get("/api/related_topics_mastery/",
                           {"user_id": user_id, "problem_id": cur_pid})["related_topics_mastery"]
     topic_level = {t: level(mastery_map[t]) for t in related_topics}
-    print(f"相关主题: {related_topics}")
 
     # 获取相似题目
     similars = api_get("/api/similar_questions/", {"problem_id": cur_pid})["similar_questions"]
-    print(f"相似题目: {similars}")
+
 
     # 获取用户历史记录
     history = api_get("/api/get_user_history/",
                       {"user_id": user_id, "page_size": 1000})["history"]
-    print(f"用户历史记录: {history}")
-
 
     done = {h["problem_id"] for h in history if h["is_passed"]}
 
     # 候选题目集合
     candidates = set(similars)
-
     # 如果相似题目不足，补充候选题目
     if len(similars) < 5:
         for topic, lvl in topic_level.items():

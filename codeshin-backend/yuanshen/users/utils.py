@@ -183,7 +183,7 @@ def level(mastery_value):
     return 3
 
 
-def recommender(user_id):
+def recommender(user_id,cur_pid):
     """
     推荐系统逻辑，根据用户的当前题目、相关主题、历史记录等生成推荐题目。
     权重完全由 API 设置。
@@ -198,22 +198,23 @@ def recommender(user_id):
         W_SIMILARITY = 1.0
         W_COMMON_TOPICS = 1.0
         W_DIFFICULTY = 1.0
-
-    # 获取当前题目 ID
-    cur_pid = api_get("/api/current_problem/", {"user_id": user_id})["current_problem_id"]
-
     # 获取相关主题和用户对这些主题的掌握程度
     related_topics = api_get("/api/related_topics/", {"problem_id": cur_pid})["related_topics"]
     mastery_map = api_get("/api/related_topics_mastery/",
                           {"user_id": user_id, "problem_id": cur_pid})["related_topics_mastery"]
     topic_level = {t: level(mastery_map[t]) for t in related_topics}
+    print(f"相关主题: {related_topics}")
 
     # 获取相似题目
     similars = api_get("/api/similar_questions/", {"problem_id": cur_pid})["similar_questions"]
+    print(f"相似题目: {similars}")
 
     # 获取用户历史记录
     history = api_get("/api/get_user_history/",
                       {"user_id": user_id, "page_size": 1000})["history"]
+    print(f"用户历史记录: {history}")
+
+
     done = {h["problem_id"] for h in history if h["is_passed"]}
 
     # 候选题目集合
@@ -282,5 +283,5 @@ def recommender(user_id):
     # 保存推荐结果
     api_post("/api/set_recommendations/",
              {"user_id": user_id, "recommended_problems": recs})
-    print(recs)
+    print(f"推荐题目: {recs}")
     return recs

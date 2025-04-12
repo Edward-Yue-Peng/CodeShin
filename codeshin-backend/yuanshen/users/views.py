@@ -217,7 +217,7 @@ def submit_code(request):
             AutosaveCode.objects.filter(user_id=user, problem_id=problem).delete()
 
             # **调用推荐系统逻辑**
-            recommendations = recommender(user.id)  # 调用推荐系统函数
+            recommendations = recommender(user.id,problem.id)  # 调用推荐系统函数
 
             # 返回响应，包括推荐结果和 GPT 反馈
             return JsonResponse({

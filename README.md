@@ -9,25 +9,11 @@ CODESHIN is an AI-powered coding platform that provides an interactive environme
 
 安装时勾选 MySQL Server 和 MySQL Workbench（图形界面可选）。
 
-设置 root 密码，账号密码存在`codeshin-backend/yuanshen/yuanshen/settings.py`。
-```python
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "yuan_database",
-        "USER": "yuanshen", # 数据库账号
-        "PASSWORD": "yuanshenqidong", # 数据库密码
-        "HOST": "localhost",  # 或者数据库服务器的IP地址
-        "PORT": "3306",  # MySQL默认端口
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-    }
-}
-```
+进入MySQL Installer，点击Reconfigure，设置 root 密码。
+
 安装完成后，打开终端（cmd 或 PowerShell）验证：
 ```bash
-mysql -u root -p
+mysql -V
 ```
 
 ### macOS
@@ -44,11 +30,34 @@ mysql -u root
 ### 创建虚拟环境并安装依赖
 ```bash
 cd codeshin-backend
+source .venv/bin/activate  
+# Windows 用 .venv\Scripts\activate
 python -m venv .venv
-source .venv/bin/activate  # Windows 用 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
-### 创建数据库
+在IDE中切换到刚刚创建的venv
+### 创建数据库用户
+账号密码储存在`codeshin-backend/yuanshen/yuanshen/settings.py`。
+```python
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "yuan_database",
+        "USER": "yuanshen", # 数据库账号
+        "PASSWORD": "yuanshenqidong", # 数据库密码
+        "HOST": "localhost",  # 或者数据库服务器的IP地址
+        "PORT": "3306",  # MySQL默认端口
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
+```
+在CMD或Terminal中输入以下命令登录MySQL，紧接着输入你在安装MySQL时设置的密码
+```bash
+mysql -u root -p
+```
+登录后，继续输入以下命令创建数据库和用户：
 ```sql
 CREATE DATABASE yuan_database DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'yuanshen'@'localhost' IDENTIFIED BY 'yuanshenqidong';

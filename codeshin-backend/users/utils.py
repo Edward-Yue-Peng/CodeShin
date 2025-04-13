@@ -183,6 +183,31 @@ def level(mastery_value):
         return 2
     return 3
 
+def load_user_candidate_metrics(user_id):
+    try:
+        user_record = UserRecommendationWeight.objects.get(user_id=user_id)
+        candidate_metrics_str = user_record.candidate_metrics_json
+        if candidate_metrics_str:
+            return json.loads(candidate_metrics_str)
+        else:
+            return []
+    except UserRecommendationWeight.DoesNotExist:
+        return []
+
+def save_user_candidate_metrics(user_id, candidate_metrics):
+    candidate_metrics_str = json.dumps(candidate_metrics)
+    try:
+        user_record = UserRecommendationWeight.objects.get(user_id=user_id)
+        user_record.candidate_metrics_json = candidate_metrics_str
+        user_record.save()
+    except UserRecommendationWeight.DoesNotExist:
+        UserRecommendationWeight.objects.create(
+            user_id=user_id,
+            similarity_weight=1.0,
+            common_topics_weight=1.0,
+            difficulty_weight=1.0,
+            candidate_metrics_json=candidate_metrics_str)
+
 def get_learning_path(user_id):
     # 从数据库中获取用户各知识点的掌握记录，例如：
     mastery_data = UserTopicMastery.objects.filter(user_id=user_id)
@@ -225,6 +250,7 @@ def recommender(user_id,cur_pid):
         W_COMMON_TOPICS = 1.0
         W_DIFFICULTY = 1.0'''
     # 获取相关主题和用户对这些主题的掌握程度
+    old_metrics = load_user_candidate_metrics(user_id)
     related_topics = api_get("/api/related_topics/", {"problem_id": cur_pid})["related_topics"]
     mastery_map = api_get("/api/related_topics_mastery/",
                           {"user_id": user_id, "problem_id": cur_pid})["related_topics_mastery"]
@@ -312,12 +338,16 @@ def recommender(user_id,cur_pid):
         candidate_metrics.append([score_sim, score_common, score_diff, score_knowledge, score_interest, score_path])
         scores.append((pid, score_sim, score_common, score_diff, score_knowledge, score_interest, score_path))
 
+    updated_metrics = old_metrics + candidate_metrics
+    updated_metrics=updated_metrics[-5: ]
     try:
-        updated_weights = update_weights_from_latest_candidates(candidate_metrics, latest_n=5, rho=0.5)
+        updated_weights = update_weights_from_latest_candidates(updated_metrics, latest_n=5, rho=0.5)
     except Exception as e:
         print(f"更新权重出错，采用默认权重：{e}")
         updated_weights = np.array([0.25, 0.2, 0.15, 0.15, 0.15, 0.1])
     w_sim, w_common, w_diff, w_know, w_int, w_path = updated_weights
+
+    save_user_candidate_metrics(user_id, updated_metrics)
 
     final_scores = []
     for (pid, score_sim, score_common, score_diff, score_knowledge, score_interest, score_path) in scores:

@@ -293,7 +293,7 @@ def recommender(user_id,cur_pid):
             print(f"API 请求失败 (获取题目 {pid} 信息): {e}")
             continue  # 发生错误时跳过当前候选题目
 
-        score_interest=100
+        score_interest=100#可以调用用户的做题历史的topic，但我不知道怎么调用
 
         candidate_topics = topics_i
         if candidate_topics:

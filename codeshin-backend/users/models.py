@@ -184,6 +184,7 @@ class UserRecommendationWeight(models.Model):
     similarity_weight = models.FloatField(default=1.0)
     common_topics_weight = models.FloatField(default=1.0)
     difficulty_weight = models.FloatField(default=1.0)
+    candidate_metrics_json = models.TextField(null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:

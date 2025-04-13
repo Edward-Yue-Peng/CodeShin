@@ -1,21 +1,8 @@
-import React, { useState, useEffect, useRef, lazy, Suspense, useContext } from 'react';
-import Box from '@mui/material/Box';
-import useMediaQuery from '@mui/material/useMediaQuery';
+// src/pages/Practice.tsx
+import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
+import { Box, IconButton, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import Split from 'react-split';
-import {
-    createTheme,
-    ThemeProvider,
-    CssBaseline,
-    Snackbar,
-    Alert,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Typography
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import NavBar from '../components/NavBar';
 import Description from '../components/Description';
 import { UserContext } from '../context/UserContext';
@@ -71,7 +58,7 @@ function Practice() {
                 body: JSON.stringify({
                     user_id: user?.userId,
                     problem_id: problemID,
-                    autosave_code: currentCode,
+                    autosave_code: currentCode || "",
                 }),
             });
             if (!response.ok) {
@@ -84,6 +71,30 @@ function Practice() {
         }
     };
 
+    const handleSendAIPanelMessage = async (message: string): Promise<string> => {
+        try {
+            const payload = {
+                user_id: user?.userId,
+                problem_id: problemID,
+                message,
+                code:code||'',
+            };
+            const response = await fetch(`${apiUrl}/api/gpt_interaction/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                return `Error: ${errorData.error}`;
+            } else {
+                const data = await response.json();
+                return data.gpt_reply;
+            }
+        } catch (error: any) {
+            return `Error: ${error.message}`;
+        }
+    };
 
     // 用户在推荐对话框中选择题目后，更新题目和代码
     const handleRecommendationSelect = async (selectedId: number) => {
@@ -112,7 +123,11 @@ function Practice() {
             const response = await fetch(`${apiUrl}/api/submit_code/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({user_id: user?.userId,problem_id: problemID,solution_code: code,})
+                body: JSON.stringify({
+                    user_id: user?.userId,
+                    problem_id: problemID,
+                    solution_code: code,
+                }),
             });
             if (!response.ok) {
                 const errText = await response.text();
@@ -134,7 +149,7 @@ function Practice() {
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
     const [aiVisible, setAiVisible] = useState(true);
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effectiveMode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
     const theme = createTheme({
         palette: {
@@ -207,7 +222,7 @@ function Practice() {
                             }}
                         >
                             <Suspense fallback={<div>Loading AI Panel...</div>}>
-                                <AIPanel />
+                                <AIPanel onSendMessage={handleSendAIPanelMessage} />
                             </Suspense>
                         </Box>
                     )}
@@ -221,7 +236,7 @@ function Practice() {
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                <Alert onClose={handleCloseSnackbar} severity="info" icon={<SaveIcon fontSize="inherit" />}>
+                <Alert onClose={handleCloseSnackbar} severity="info">
                     Saved
                 </Alert>
             </Snackbar>
@@ -249,7 +264,7 @@ function Practice() {
                         variant="outlined"
                         onClick={async () => {
                             setOpenFeedback(false);
-                            setOpenRecommendations(true)
+                            setOpenRecommendations(true);
                         }}
                     >
                         Next Problem

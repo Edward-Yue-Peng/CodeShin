@@ -6,11 +6,15 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator, EmptyPage
 from django.conf import settings
+
+from utils.ai_interaction import prompt_interaction
 from .models import (
     Problem, UserHistory, AutosaveCode, UserTopicMastery, Recommendation,
     GptConversation, ConversationSession, Topic, TopicProblem, UserRecommendationWeight
 )
-from .utils import initialize_user_topics, recommender
+from utils.ai_evaluation import (evaluate_code_with_gpt, parse_feedback)
+from .utils import initialize_user_topics
+from utils.recommendations import recommender
 import json
 import requests
 from .constants import ALL_TOPICS
@@ -181,7 +185,7 @@ def submit_code(request):
             new_version = (latest_submission.version + 1) if latest_submission else 1
 
             # 调用 GPT 打分系统
-            from .utils import evaluate_code_with_gpt, parse_feedback
+
             description = problem.description
             history = "\n".join([c.message for c in GptConversation.objects.filter(session__user_id=user, session__problem_id=problem)])
             related_topics = [topic.name for topic in problem.related_topics.all()]
@@ -724,8 +728,8 @@ def gpt_interaction_api(request):
             user_id = data.get('user_id')
             problem_id = data.get('problem_id')
             user_message = data.get('message')
+            user_code = data.get('code')
             conversation_type = "user"
-
             if not user_id or not problem_id or not user_message:
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
@@ -760,8 +764,9 @@ def gpt_interaction_api(request):
                 role = "user" if conv.conversation_type == "user" else "assistant"
                 messages.append({"role": role, "content": conv.message})
 
+            description = problem.description
             # 将最新的用户消息添加到对话历史中
-            messages.append({"role": "user", "content": user_message})
+            messages.append({"role": "user", "content": prompt_interaction(user_message,description,user_code)})
 
             # 调用 GPT API 获取回复
             gpt_api_url = settings.URL

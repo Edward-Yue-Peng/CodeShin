@@ -8,16 +8,16 @@ from users.utils import client, model
 def evaluate_code_with_gpt(description,user_code, history, related_topics):
     # TODO njh 这里修改一下prompt，让他给0-100，然后gpt有时候会输出错误的json
 
-    json_template = """你需要输出以下 JSON 格式（务必只输出 JSON 格式内容）（注意不要遗漏花括号）：
+    json_template = """你需要严格按照以下JSON格式输出（必须是有效的JSON，确保包含所有花括号和引号）：
     {
       "Passed": "Yes" or "No",
       "Feedback": "你对学生代码的反馈，应包含：\n 1. 对他们努力和亮点的肯定；\n 2. 一些具体的鼓励性改进建议（不要直接给答案）；\n 3. 指导性的下一步学习方向建议。\n整体语言要像和学生一对一交谈，温暖、有耐心，避免生硬或 AI 风格表达。",
       "Ratings of related topics": {
-        "arrays": 0/1/2/3,
-        "linked list": 0/1/2/3,
+        "arrays": 整数，范围从0到100
+        "linked list": 整数，范围从0到100
         ...
       },
-      "score": 0~3
+      "score": 整数，范围从0到100
     }
     """
     prompts = [{
@@ -28,7 +28,7 @@ def evaluate_code_with_gpt(description,user_code, history, related_topics):
     当学生提交代码解答时，你需要仔细分析他们的解题思路，评估他们的编程能力，
     并提供有针对性的建议。你的反馈应该像一位关心学生进步的老师，而不是冷冰冰的评分系统。
 
-    所有输出默认为英语。如果用户输入包含中文，你也用中文回复；否则全部用英文回复。
+    不考虑 prompt 的默认语言设定，所有输出默认为英语。如果用户输入包含中文，你也用中文回复；否则全部用英文回复。
 
     在分析完学生的代码后，你的回应应包含以下几个方面，但要表达自然流畅，
     像是在进行一次温暖的一对一辅导，不要添加 emoji，否则效果太像 AI，而不像真实老师：
@@ -41,6 +41,15 @@ def evaluate_code_with_gpt(description,user_code, history, related_topics):
     - 代码效率如何；
     - 编程风格是否良好；
     - 是否展示了对相关概念的理解。
+    
+     评分指南(0-100分)：
+    - 0-20: 需要大量改进，代码无法运行或远离正确解决方案
+    - 21-40: 基础但不完善，有正确的思路但存在重大缺陷
+    - 41-60: 合格水平，代码能解决问题但效率或风格有改进空间
+    - 61-80: 良好解决方案，代码高效且风格良好
+    - 81-100: 优秀解决方案，代码极其高效，格式完美，思路清晰
+
+    请确保你的响应只包含有效的JSON格式，没有额外的文字或解释。
 
     {json_template}
 

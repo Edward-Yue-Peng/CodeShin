@@ -7,6 +7,7 @@ from openai import OpenAI
 import re
 import json
 
+
 BASE_URL = settings.BASE_URL
 
 # 初始化 OpenAI 客户端
@@ -182,13 +183,38 @@ def level(mastery_value):
         return 2
     return 3
 
+def get_learning_path(user_id):
+    # 从数据库中获取用户各知识点的掌握记录，例如：
+    mastery_data = UserTopicMastery.objects.filter(user_id=user_id)
+    # 按掌握程度从低到高排序
+    sorted_topics = sorted(mastery_data, key=lambda record: record.mastery_level)
+    return [record.topic_name for record in sorted_topics]
+
+def weight(A, rho=0.5):
+    Mean = np.mean(A, axis=0)
+    B = A / Mean
+    ideal = np.max(B, axis=0)
+    absX0_Xi = np.abs(B - ideal)
+    a = np.min(absX0_Xi)
+    b = np.max(absX0_Xi)
+    m = (a + rho * b) / (absX0_Xi + rho * b)
+    w = np.mean(m, axis=0)
+    q = w / np.sum(w)
+    return q
+
+def update_weights_from_latest_candidates(candidate_metrics, latest_n=5, rho=0.5):
+    if len(candidate_metrics) == 0:
+        return np.array([0.25, 0.2, 0.15, 0.15, 0.15, 0.1])  # 默认6维权重，和为1
+    latest = candidate_metrics[-latest_n:] if len(candidate_metrics) >= latest_n else candidate_metrics
+    M = np.array(latest)
+    return weight(M, rho)
 
 def recommender(user_id,cur_pid):
     """
     推荐系统逻辑，根据用户的当前题目、相关主题、历史记录等生成推荐题目。
     权重完全由 API 设置。
     """
-    try:
+    '''try:
         user_weights = UserRecommendationWeight.objects.get(user_id=user_id)
         W_SIMILARITY = user_weights.similarity_weight
         W_COMMON_TOPICS = user_weights.common_topics_weight
@@ -197,7 +223,7 @@ def recommender(user_id,cur_pid):
         # 如果用户没有自定义权重，则使用默认权重 (你可以根据需要调整默认值)
         W_SIMILARITY = 1.0
         W_COMMON_TOPICS = 1.0
-        W_DIFFICULTY = 1.0
+        W_DIFFICULTY = 1.0'''
     # 获取相关主题和用户对这些主题的掌握程度
     related_topics = api_get("/api/related_topics/", {"problem_id": cur_pid})["related_topics"]
     mastery_map = api_get("/api/related_topics_mastery/",
@@ -225,20 +251,22 @@ def recommender(user_id,cur_pid):
                 candidates.update(same_level_ids)
 
     # 计算候选题目的分数
+    candidate_metrics = []
     scores = []
+    learning_path = get_learning_path(user_id)
     for pid in candidates:
         if pid in done:
             continue
 
         # 相似性得分
-        score_sim = 1.0 if pid in similars else 0.0
+        score_sim = 100 if pid in similars else 0.0
 
         # 共同话题得分
         topics_i = set(api_get("/api/related_topics/", {"problem_id": pid})["related_topics"])
         common = topics_i & set(related_topics)
         if common:
             poor = sum(1 for t in common if topic_level[t] < 3)
-            score_common = poor / len(common)
+            score_common = poor / len(common)*100
         else:
             score_common = 0.0
 
@@ -258,23 +286,45 @@ def recommender(user_id,cur_pid):
             if difficulty_level_numeric is not None and related_topics:
                 avg_lvl = sum(topic_level.values()) / len(topic_level)
                 diff = abs(difficulty_level_numeric / 3.0 - avg_lvl)
-                score_diff = max(0.0, 1 - diff / 2)
+                score_diff = max(0.0, 1 - diff / 2)*100
             else:
                 score_diff = 0.0
-
-            # 总分
-            total = (W_SIMILARITY * score_sim +
-                     W_COMMON_TOPICS * score_common +
-                     W_DIFFICULTY * score_diff)
-            scores.append((pid, total))
-
         except requests.exceptions.RequestException as e:
             print(f"API 请求失败 (获取题目 {pid} 信息): {e}")
             continue  # 发生错误时跳过当前候选题目
 
-    # 按分数排序并选择前两个推荐题目
-    scores.sort(key=lambda x: x[1], reverse=True)
-    recs = [pid for pid, _ in scores[:2]]
+        score_interest=100
+
+        candidate_topics = topics_i
+        if candidate_topics:
+            poorly_mastered = sum(1 for t in candidate_topics if t in topic_level and topic_level[t] < 3)
+            score_knowledge = (poorly_mastered / len(candidate_topics)) * 100
+        else:
+            score_knowledge = 0
+
+
+        if candidate_topics:
+            matching = sum(1 for t in candidate_topics if t in learning_path)
+            score_path = (matching / len(candidate_topics)) * 100
+        else:
+            score_path = 0
+
+        candidate_metrics.append([score_sim, score_common, score_diff, score_knowledge, score_interest, score_path])
+        scores.append((pid, score_sim, score_common, score_diff, score_knowledge, score_interest, score_path))
+
+    try:
+        updated_weights = update_weights_from_latest_candidates(candidate_metrics, latest_n=5, rho=0.5)
+    except Exception as e:
+        print(f"更新权重出错，采用默认权重：{e}")
+        updated_weights = np.array([0.25, 0.2, 0.15, 0.15, 0.15, 0.1])
+    w_sim, w_common, w_diff, w_know, w_int, w_path = updated_weights
+
+    final_scores = []
+    for (pid, score_sim, score_common, score_diff, score_knowledge, score_interest, score_path) in scores:
+        total = (w_sim * score_sim + w_common * score_common + w_diff * score_diff + w_know * score_knowledge + w_int * score_interest + w_path * score_path)
+        final_scores.append((pid, total))
+    final_scores.sort(key=lambda x: x[1], reverse=True)
+    recs = [pid for pid, _ in final_scores[:2]]
 
     # 保存推荐结果
     api_post("/api/set_recommendations/",

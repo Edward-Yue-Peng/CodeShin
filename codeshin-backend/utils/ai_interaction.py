@@ -1,7 +1,5 @@
 def prompt_interaction(user_message,description,user_code):
-    prompts = [{
-        "role": "user",
-        "content": f"""你是一位专业且友好的编程助手，正在回答学生的编程问题。
+    prompts = f"""你是一位专业且友好的编程助手，正在回答学生的编程问题。
 
         以下是学生的问题和代码，请提供有帮助的回答：
 
@@ -26,6 +24,5 @@ def prompt_interaction(user_message,description,user_code):
 
         请从理解学生的具体问题出发，提供针对性帮助，而不是泛泛而谈。
         """
-    }]
 
     return prompts

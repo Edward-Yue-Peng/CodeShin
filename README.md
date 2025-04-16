@@ -65,7 +65,7 @@ GRANT ALL PRIVILEGES ON yuan_database.* TO 'yuanshen'@'localhost';
 FLUSH PRIVILEGES;
 ```
 ### 导入密钥
-将key.json文件存入`codeshin-backend/yuanshen/`目录下。
+将key.json文件存入`codeshin-backend/yuanshen/yuanshen/`目录下。
 
 ### 初始化数据库
 ```bash

@@ -69,8 +69,7 @@
     - 响应体:
         ```json
         {
-            "message": "Login successful",
-            "user_id": 1
+            "message": "Login successful"
         }
         ```
 - **失败**:
@@ -250,7 +249,7 @@
 ### 1. 提交代码并打分
 - **URL**: `/api/submit_code/`
 - **方法**: `POST`
-- **描述**: 提交用户编写的解题代码，并使用 GPT 模型进行评估和打分。同时更新用户提交历史、掌握程度和触发推荐。
+- **描述**: 提交用户编写的解题代码，并使用 GPT 模型进行评估和打分。同时更新用户提交历史、掌握程度。
 
 #### 请求
 - **请求头**: `Content-Type: application/json`
@@ -274,7 +273,6 @@
         {
             "message": "Code submitted and scored successfully",
             "version": integer,  // 本次提交的代码版本号
-            "recommendations": array,  // 推荐的题目 ID 列表
             "score": float or null,  // GPT 模型给出的代码评分 (0-1 之间)，可能为 null
             "feedback": string  // GPT 模型对代码的反馈
         }
@@ -284,28 +282,7 @@
     - 响应体:
         ```json
         {
-            "error": "Missing required fields"
-        }
-        ```
-    - 状态码: `400 Bad Request`
-    - 响应体:
-        ```json
-        {
-            "error": "Invalid JSON format"
-        }
-        ```
-    - 状态码: `400 Bad Request`
-    - 响应体:
-        ```json
-        {
-            "error": "Invalid user_id"
-        }
-        ```
-    - 状态码: `400 Bad Request`
-    - 响应体:
-        ```json
-        {
-            "error": "Invalid problem_id"
+            "error": "..."  // 包含具体的错误信息
         }
         ```
     - 状态码: `404 Not Found`
@@ -333,7 +310,65 @@
 
 ---
 
-### 2. 自动保存代码
+### 2. 调用推荐系统API
+- **URL**: `/api/call_recommender/`
+- **方法**: `POST`
+- **描述**: 用户确认完成当前题目后调用推荐系统，生成下一题的推荐结果。
+
+#### 请求
+- **请求头**: `Content-Type: application/json`
+- **请求体**:
+    ```json
+    {
+        "user_id": integer,
+        "problem_id": integer,
+    }
+    ```
+
+#### 响应
+- **成功**:
+    - 状态码: `201 Created`
+    - 响应体:
+        ```json
+    {
+    "message": "Recommendations generated successfully",
+    "recommendations": [102, 103]
+    }
+        ```
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "..."  // 包含具体的错误信息
+        }
+        ```
+    - 状态码: `404 Not Found`
+    - 响应体:
+        ```json
+        {
+            "error": "No conversation session found"
+        }
+        ```
+    - 状态码: `500 Internal Server Error`
+    - 响应体:
+        ```json
+        {
+            "error": "..."  // 包含具体的错误信息
+        }
+        ```
+- **方法不允许**:
+    - 状态码: `405 Method Not Allowed`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid request method"
+        }
+        ```
+
+---
+
+### 3. 自动保存代码
 - **URL**: `/api/autosave_code/`
 - **方法**: `POST`
 - **描述**: 自动保存用户的解题代码。
@@ -653,7 +688,7 @@
 
 ### 6. 获取当前题目的所有相似题目
 - **URL**: `/api/similar_questions/`
-- **方法**: [GET](http://_vscodecontentref_/2)
+- **方法**: `GET`
 - **描述**: 获取当前题目的所有相似题目。
 
 #### 请求
@@ -778,82 +813,6 @@
         ```
 
 ---
-
-## 设置推荐权重
-
-### 1、设置用户推荐权重 API
-
-- **URL**: `/api/set_recommendation_weights/`
-- **方法**: `POST`
-- **描述**: 允许用户设置推荐算法中不同因素的权重。
-
-#### 请求
-
-- **请求头**: `Content-Type: application/json`
-- **请求体**:
-    ```json
-    {
-        "user_id": 1,
-        "similarity_weight": 0.8,
-        "common_topics_weight": 0.5,
-        "difficulty_weight": 0.7
-    }
-    ```
-    - `user_id` (integer, required): 需要设置权重的用户的 ID。
-    - `similarity_weight` (float, required): 相似性得分的权重。
-    - `common_topics_weight` (float, required): 共同话题得分的权重。
-    - `difficulty_weight` (float, required): 难度匹配得分的权重。
-
-#### 响应
-
-- **成功**:
-    - 状态码: `200 OK`
-    - 响应体:
-        ```json
-        {
-            "message": "Recommendation weights updated successfully"
-        }
-        ```
-
-- **失败**:
-    - **状态码**: `400 Bad Request`
-        - **响应体**:
-            ```json
-            {
-                "error": "Missing required fields (user_id, similarity_weight, common_topics_weight, difficulty_weight)"
-            }
-            ```
-            - 说明: 请求体中缺少必要的权重字段或 `user_id`。
-        - **响应体**:
-            ```json
-            {
-                "error": "Invalid JSON format"
-            }
-            ```
-            - 说明: 请求体不是有效的 JSON 格式。
-        - **响应体**:
-            ```json
-            {
-                "error": "Invalid user_id"
-            }
-            ```
-            - 说明: 提供的 `user_id` 在数据库中不存在。
-    - **状态码**: `405 Method Not Allowed`
-        - **响应体**:
-            ```json
-            {
-                "error": "Invalid request method"
-            }
-            ```
-            - 说明: 请求方法不是 `POST`。
-    - **状态码**: `500 Internal Server Error`
-        - **响应体**:
-            ```json
-            {
-                "error": "..."
-            }
-            ```
-            - 说明: 服务器内部错误，错误信息会包含在 `error` 字段中。
 
 ## 推荐题号的写和读
 
@@ -997,7 +956,6 @@
     {
         "user_id": 1,
         "problem_id": 42,
-        "code": "print('hello world')",
         "message": "Explain the time complexity of this algorithm."
     }
     ```

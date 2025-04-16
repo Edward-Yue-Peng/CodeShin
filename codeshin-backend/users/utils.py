@@ -6,9 +6,11 @@ from openai import OpenAI
 
 BASE_URL = settings.BASE_URL
 
+
 # 初始化 OpenAI 客户端
 model = settings.MODEL
 client = OpenAI(api_key=settings.API_KEY, base_url=settings.URL)
+
 
 # 初始化用户主题掌握记录
 
@@ -22,8 +24,7 @@ def initialize_user_topics(user):
         )
 
 
-
-# 以下实现推荐系统
+# 以下是推荐系统的辅助函数
 
 def api_get(path, params=None):
     """发送 GET 请求到指定 API 路径"""
@@ -31,13 +32,11 @@ def api_get(path, params=None):
     resp.raise_for_status()
     return resp.json()
 
-
 def api_post(path, json_body):
     """发送 POST 请求到指定 API 路径"""
     r = requests.post(f"{BASE_URL}{path}", json=json_body)
     r.raise_for_status()
     return r.json()
-
 
 def level(mastery_value):
     """根据掌握程度返回等级"""
@@ -46,4 +45,3 @@ def level(mastery_value):
     if mastery_value < 0.66:
         return 2
     return 3
-

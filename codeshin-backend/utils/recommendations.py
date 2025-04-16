@@ -1,37 +1,34 @@
 import json
-
 import numpy as np
 import requests
-
-from users.models import UserRecommendationWeight, UserTopicMastery
+from datetime import datetime
+from users.models import UserHistory, RecommendationLog, UserTopicMastery
 from users.utils import api_get, level, api_post
 
 
 def load_user_candidate_metrics(user_id):
-    try:
-        user_record = UserRecommendationWeight.objects.get(user_id=user_id)
-        candidate_metrics_str = user_record.candidate_metrics_json
-        if candidate_metrics_str:
-            return json.loads(candidate_metrics_str)
-        else:
-            return []
-    except UserRecommendationWeight.DoesNotExist:
-        return []
+    """
+    从 RecommendationLog 中加载用户最近 5 次的推荐参数记录。
+    """
+    logs = RecommendationLog.objects.filter(user_id=user_id).order_by('-timestamp')[:5]
+    return [[log.score_sim, log.score_common, log.score_diff, log.score_knowledge, log.score_interest, log.score_path] for log in logs]
 
 
-def save_user_candidate_metrics(user_id, candidate_metrics):
-    candidate_metrics_str = json.dumps(candidate_metrics)
-    try:
-        user_record = UserRecommendationWeight.objects.get(user_id=user_id)
-        user_record.candidate_metrics_json = candidate_metrics_str
-        user_record.save()
-    except UserRecommendationWeight.DoesNotExist:
-        UserRecommendationWeight.objects.create(
+def save_user_candidate_metrics(user_id, problem_id, candidate_metrics):
+    """
+    将推荐参数保存到 RecommendationLog 中。
+    """
+    for metrics in candidate_metrics:
+        RecommendationLog.objects.create(
             user_id=user_id,
-            similarity_weight=1.0,
-            common_topics_weight=1.0,
-            difficulty_weight=1.0,
-            candidate_metrics_json=candidate_metrics_str)
+            problem_id=problem_id,
+            score_sim=metrics[0],
+            score_common=metrics[1],
+            score_diff=metrics[2],
+            score_knowledge=metrics[3],
+            score_interest=metrics[4],
+            score_path=metrics[5]
+        )
 
 
 def get_learning_path(user_id):
@@ -43,6 +40,9 @@ def get_learning_path(user_id):
 
 
 def weight(A, rho=0.5):
+    """
+    动态计算权重。
+    """
     Mean = np.mean(A, axis=0)
     B = A / Mean
     ideal = np.max(B, axis=0)
@@ -56,11 +56,42 @@ def weight(A, rho=0.5):
 
 
 def update_weights_from_latest_candidates(candidate_metrics, latest_n=5, rho=0.5):
+    """
+    根据最近的推荐参数记录动态更新权重。
+    """
     if len(candidate_metrics) == 0:
         return np.array([0.25, 0.2, 0.15, 0.15, 0.15, 0.1])  # 默认6维权重，和为1
     latest = candidate_metrics[-latest_n:] if len(candidate_metrics) >= latest_n else candidate_metrics
     M = np.array(latest)
     return weight(M, rho)
+
+
+def calculate_interest_score_with_time_decay(user_id, topics_i):
+    """
+    根据用户的历史记录和时间衰减动态计算兴趣得分。
+    """
+    topic_count = {}
+    now = datetime.now()
+
+    # 查询用户历史记录
+    history = UserHistory.objects.filter(user_id=user_id).values('timestamp', 'problem_id__related_topics')
+
+    for record in history:
+        timestamp = record['timestamp']
+        if timestamp:
+            time_diff = (now - timestamp).days
+            decay_factor = 0.9 ** time_diff  # 指数衰减，时间越久权重越低
+        else:
+            decay_factor = 1.0  # 如果没有时间戳，则不衰减
+
+        # 累计每个主题的权重
+        for topic in record['problem_id__related_topics']:
+            topic_count[topic] = topic_count.get(topic, 0) + decay_factor
+
+    # 计算候选题目相关主题的兴趣得分
+    interest_score = sum(topic_count.get(topic, 0) for topic in topics_i)
+    max_score = max(topic_count.values(), default=1)  # 避免除以 0
+    return (interest_score / max_score) * 100  # 归一化到 0-100
 
 
 def recommender(user_id,cur_pid):
@@ -89,7 +120,6 @@ def recommender(user_id,cur_pid):
     # 获取相似题目
     similars = api_get("/api/similar_questions/", {"problem_id": cur_pid})["similar_questions"]
 
-
     # 获取用户历史记录
     history = api_get("/api/get_user_history/",
                       {"user_id": user_id, "page_size": 1000})["history"]
@@ -98,7 +128,6 @@ def recommender(user_id,cur_pid):
 
     # 候选题目集合
     candidates = set(similars)
-    # 如果相似题目不足，补充候选题目
     if len(similars) < 5:
         for topic, lvl in topic_level.items():
             if lvl in (1, 2):
@@ -120,68 +149,56 @@ def recommender(user_id,cur_pid):
         # 共同话题得分
         topics_i = set(api_get("/api/related_topics/", {"problem_id": pid})["related_topics"])
         common = topics_i & set(related_topics)
-        if common:
-            poor = sum(1 for t in common if topic_level[t] < 3)
-            score_common = poor / len(common)*100
-        else:
-            score_common = 0.0
+        score_common = (sum(1 for t in common if topic_level[t] < 3) / len(common) * 100) if common else 0.0
 
+        # 难度匹配得分
         try:
-            # 难度匹配得分
             problem_difficulty_data = api_get("/api/problem_difficulty/", {"problem_id": pid})
             difficulty_str = problem_difficulty_data.get("problem_difficulty")
-            difficulty_level_numeric = None
-
-            if difficulty_str == "Easy":
-                difficulty_level_numeric = 1
-            elif difficulty_str == "Medium":
-                difficulty_level_numeric = 2
-            elif difficulty_str == "Hard":
-                difficulty_level_numeric = 3
+            difficulty_level_numeric = {"Easy": 1, "Medium": 2, "Hard": 3}.get(difficulty_str, None)
 
             if difficulty_level_numeric is not None and related_topics:
                 avg_lvl = sum(topic_level.values()) / len(topic_level)
                 diff = abs(difficulty_level_numeric / 3.0 - avg_lvl)
-                score_diff = max(0.0, 1 - diff / 2)*100
+                score_diff = max(0.0, 1 - diff / 2) * 100
             else:
                 score_diff = 0.0
         except requests.exceptions.RequestException as e:
             print(f"API 请求失败 (获取题目 {pid} 信息): {e}")
-            continue  # 发生错误时跳过当前候选题目
+            continue
 
-        score_interest=100#可以调用用户的做题历史的topic，但我不知道怎么调用
+        # 动态兴趣得分
+        score_interest = calculate_interest_score_with_time_decay(user_id, topics_i)
 
-        candidate_topics = topics_i
-        if candidate_topics:
-            poorly_mastered = sum(1 for t in candidate_topics if t in topic_level and topic_level[t] < 3)
-            score_knowledge = (poorly_mastered / len(candidate_topics)) * 100
-        else:
-            score_knowledge = 0
+        # 知识点掌握得分
+        poorly_mastered = sum(1 for t in topics_i if t in topic_level and topic_level[t] < 3)
+        score_knowledge = (poorly_mastered / len(topics_i) * 100) if topics_i else 0.0
 
-
-        if candidate_topics:
-            matching = sum(1 for t in candidate_topics if t in learning_path)
-            score_path = (matching / len(candidate_topics)) * 100
-        else:
-            score_path = 0
+        # 学习路径匹配得分
+        matching = sum(1 for t in topics_i if t in learning_path)
+        score_path = (matching / len(topics_i) * 100) if topics_i else 0.0
 
         candidate_metrics.append([score_sim, score_common, score_diff, score_knowledge, score_interest, score_path])
         scores.append((pid, score_sim, score_common, score_diff, score_knowledge, score_interest, score_path))
 
+    # 更新权重
     updated_metrics = old_metrics + candidate_metrics
-    updated_metrics=updated_metrics[-5: ]
+    updated_metrics = updated_metrics[-5:]
     try:
         updated_weights = update_weights_from_latest_candidates(updated_metrics, latest_n=5, rho=0.5)
     except Exception as e:
         print(f"更新权重出错，采用默认权重：{e}")
         updated_weights = np.array([0.25, 0.2, 0.15, 0.15, 0.15, 0.1])
     w_sim, w_common, w_diff, w_know, w_int, w_path = updated_weights
+    
+    # 保存推荐参数
+    save_user_candidate_metrics(user_id, cur_pid, updated_metrics)
 
-    save_user_candidate_metrics(user_id, updated_metrics)
-
+    # 计算最终分数
     final_scores = []
     for (pid, score_sim, score_common, score_diff, score_knowledge, score_interest, score_path) in scores:
-        total = (w_sim * score_sim + w_common * score_common + w_diff * score_diff + w_know * score_knowledge + w_int * score_interest + w_path * score_path)
+        total = (w_sim * score_sim + w_common * score_common + w_diff * score_diff +
+                 w_know * score_knowledge + w_int * score_interest + w_path * score_path)
         final_scores.append((pid, total))
     final_scores.sort(key=lambda x: x[1], reverse=True)
     recs = [pid for pid, _ in final_scores[:2]]

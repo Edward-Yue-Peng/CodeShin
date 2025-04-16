@@ -176,21 +176,24 @@ class Recommendation(models.Model):
 
     def __str__(self):
         return f"{self.user_id.username} - Recommendations"
-    
 
-# 推荐权重模型
-class UserRecommendationWeight(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True, related_name='recommendation_weights')
-    similarity_weight = models.FloatField(default=1.0)
-    common_topics_weight = models.FloatField(default=1.0)
-    difficulty_weight = models.FloatField(default=1.0)
-    candidate_metrics_json = models.TextField(null=True, blank=True)
-    last_updated = models.DateTimeField(auto_now=True)
+
+class RecommendationLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id', related_name='recommendation_logs')  # 用户外键
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, db_column='problem_id', related_name='recommendation_logs')  # 题目外键
+    score_sim = models.FloatField()  # 相似性得分
+    score_common = models.FloatField()  # 共同话题得分
+    score_diff = models.FloatField()  # 难度匹配得分
+    score_knowledge = models.FloatField()  # 知识点掌握得分
+    score_interest = models.FloatField()  # 兴趣得分
+    score_path = models.FloatField()  # 学习路径匹配得分
+    timestamp = models.DateTimeField(auto_now_add=True)  # 推荐调用时间
 
     class Meta:
-        db_table = 'user_recommendation_weights'
-        verbose_name = 'User Recommendation Weight'
-        verbose_name_plural = 'User Recommendation Weights'
+        db_table = 'recommendation_logs'  # 数据库表名
+        verbose_name = 'Recommendation Log'
+        verbose_name_plural = 'Recommendation Logs'
+        ordering = ['-timestamp']  # 默认按时间倒序排序
 
     def __str__(self):
-        return f"{self.user.username}'s Recommendation Weights"
+        return f"User: {self.user.username}, Problem: {self.problem.title}, Timestamp: {self.timestamp}"

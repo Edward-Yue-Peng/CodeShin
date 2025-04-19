@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 from users.models import UserHistory, RecommendationLog, UserTopicMastery
 from users.utils import api_get, level, api_post
 
@@ -71,7 +71,8 @@ def calculate_interest_score_with_time_decay(user_id, topics_i):
     根据用户的历史记录和时间衰减动态计算兴趣得分。
     """
     topic_count = {}
-    now = datetime.now()
+    # 因为服务器存的是GMT时间，所以这里需要转换一下
+    now = datetime.now(timezone.utc)
 
     # 查询用户历史记录
     history = UserHistory.objects.filter(user_id=user_id).values('timestamp', 'problem_id__related_topics')
@@ -84,8 +85,13 @@ def calculate_interest_score_with_time_decay(user_id, topics_i):
         else:
             decay_factor = 1.0  # 如果没有时间戳，则不衰减
 
+        def to_list(x):
+            return x if isinstance(x, list) else [x]
+
         # 累计每个主题的权重
-        for topic in record['problem_id__related_topics']:
+        # TODO 待对接，为什么这里输出的是一个字符串而不是列表
+        # print(record['problem_id__related_topics'])
+        for topic in to_list(record['problem_id__related_topics']):
             topic_count[topic] = topic_count.get(topic, 0) + decay_factor
 
     # 计算候选题目相关主题的兴趣得分
@@ -95,7 +101,6 @@ def calculate_interest_score_with_time_decay(user_id, topics_i):
 
 
 def recommender(user_id,cur_pid):
-    # TODO jbs做这里，优化推荐逻辑
     """
     推荐系统逻辑，根据用户的当前题目、相关主题、历史记录等生成推荐题目。
     权重完全由 API 设置。
@@ -169,11 +174,9 @@ def recommender(user_id,cur_pid):
 
         # 动态兴趣得分
         score_interest = calculate_interest_score_with_time_decay(user_id, topics_i)
-
         # 知识点掌握得分
         poorly_mastered = sum(1 for t in topics_i if t in topic_level and topic_level[t] < 3)
         score_knowledge = (poorly_mastered / len(topics_i) * 100) if topics_i else 0.0
-
         # 学习路径匹配得分
         matching = sum(1 for t in topics_i if t in learning_path)
         score_path = (matching / len(topics_i) * 100) if topics_i else 0.0
@@ -204,7 +207,9 @@ def recommender(user_id,cur_pid):
     recs = [pid for pid, _ in final_scores[:2]]
 
     # 保存推荐结果
-    api_post("/api/set_recommendations/",
-             {"user_id": user_id, "recommended_problems": recs})
     print(f"推荐题目: {recs}")
+
+    # TODO 对接，这个还有没有必要保存，这玩意总是有问题
+    # api_post("/api/set_recommendations/",
+    #          {"user_id": user_id, "recommended_problems": recs})
     return recs

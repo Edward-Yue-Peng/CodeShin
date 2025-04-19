@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views import (
     register,
     user_login,
@@ -16,13 +17,13 @@ from .views import (
     get_all_topics_mastery_api,
     get_similar_questions_api,
     get_topic_difficulty_bucket,
-    get_topic_index, 
+    get_topic_index,
     set_recommendations,
     get_recommendations,
     create_conversation_session,
     gpt_interaction_api,
     get_gpt_conversations,
-    clear_gpt_conversations
+    clear_gpt_conversations, call_recommender
 )
 
 urlpatterns = [
@@ -43,7 +44,7 @@ urlpatterns = [
 
     # 推荐系统
     path('get_user_history/', get_user_history, name='get_user_history'),  # 获取用户历史记录
-    
+    path('call_recommender/', call_recommender, name='call_recommender'),  # 调用推荐系统
     path('current_problem/', get_current_problem_api, name='get_current_problem'),  # 获取当前题号
     path('related_topics/', get_related_topics_api, name='get_related_topics'),  # 获取当前题目相关 topic
     path('related_topics_mastery/', get_related_topics_mastery_api, name='get_related_topics_mastery'),  # 获取当前题目相关 topic 的掌握度

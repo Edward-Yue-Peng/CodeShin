@@ -1,11 +1,10 @@
 // src/pages/Practice.tsx
-// 练习页面
 import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
 import { Box, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import Split from 'react-split';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import NavBar from '../components/NavBar';
-import Description from '../components/Description';
+import Description, { ProblemData } from '../components/Description';
 import { UserContext } from '../context/UserContext';
 const CodeEditor = lazy(() => import('../components/CodeEditor'));
 const AIPanel = lazy(() => import('../components/AIPanel'));
@@ -21,8 +20,12 @@ function Practice() {
     const [recommendedProblems, setRecommendedProblems] = useState<number[]>([]);
     const [feedback, setFeedback] = useState<string>("");
     const [score, setScore] = useState<number>(-1);
-    const [openRecommendations, setOpenRecommendations] = useState(false);
+    const [openRecommendations, setRecommendations] = useState(false);
     const [openFeedback, setOpenFeedback] = useState(false);
+
+    const [problem, setProblem] = useState<ProblemData | null>(null);
+    const [loadingProblem, setLoadingProblem] = useState<boolean>(false);
+    const [problemError, setProblemError] = useState<string>('');
 
     // 初始获取用户进度、代码和题目
     const fetchUserData = async () => {
@@ -50,6 +53,34 @@ function Practice() {
             fetchUserData();
         }
     }, [user]);
+
+    // 从题目ID获得题目信息
+    useEffect(() => {
+        if (!problemID) {
+            setProblem(null);
+            setProblemError('');
+            return;
+        }
+        fetchProblemDetail(problemID);
+    }, [problemID]);
+    async function fetchProblemDetail(pid: number) {
+        setLoadingProblem(true);
+        setProblemError('');
+        try {
+            const res = await fetch(`${API_URL}/api/problems/?id=${pid}`);
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text);
+            }
+            const data: ProblemData = await res.json();
+            setProblem(data);
+        } catch (err: any) {
+            setProblemError(err.message || 'Failed to load problem');
+            setProblem(null);
+        } finally {
+            setLoadingProblem(false);
+        }
+    }
 
     // 保存代码
     const handleSave = async (currentCode: string) => {
@@ -80,7 +111,7 @@ function Practice() {
                 user_id: user?.userId,
                 problem_id: problemID,
                 message,
-                code:code||'',
+                code: code || '',
             };
             const response = await fetch(`${API_URL}/api/gpt_interaction/`, {
                 method: 'POST',
@@ -111,7 +142,7 @@ function Practice() {
             const data = await response.json();
             setProblemID(selectedId);
             setCode(data.default_code || '');
-            setOpenRecommendations(false);
+            setRecommendations(false);
             setOpenFeedback(false);
         } catch (error: any) {
             alert('Failed to load the selected problem: ' + error.message);
@@ -126,7 +157,6 @@ function Practice() {
     // 提交代码
     const handleSubmit = async () => {
         try {
-            // TODO 提交后应该有UI提示
             const response = await fetch(`${API_URL}/api/submit_code/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -142,13 +172,36 @@ function Practice() {
             }
 
             const data = await response.json();
-            console.log("Submission result:", data);
             setFeedback(data.feedback || '');
             setScore(data.score);
+            setOpenFeedback(true);
         } catch (error: any) {
             alert("Submission failed: " + error.message);
         }
     };
+
+    // 获得推荐题目
+    const handleRecommendations = async () => {
+        try {
+            const response = await fetch(`${API_URL}/api/call_recommender/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user?.userId,
+                    problem_id: problemID,
+                }),
+            });
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(errText);
+            }
+            const data = await response.json();
+            setRecommendedProblems(data.recommendations);
+            setRecommendations(true);
+        } catch (error: any) {
+            alert('Failed to load recommendations: ' + error.message);
+        }
+    }
 
     // 布局相关状态
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
@@ -197,7 +250,11 @@ function Practice() {
                             minHeight: 0,
                         }}
                     >
-                        <Description problemID={problemID} />
+                        <Description
+                            problem={problem}
+                            loading={loadingProblem}
+                            error={problemError}
+                        />
                     </Box>
                     {/* 中间：代码编辑器 */}
                     <Box
@@ -254,7 +311,7 @@ function Practice() {
                 maxWidth="sm"
             >
                 <DialogTitle>
-                    Merge Sort Feedback <span role="img" aria-label="feedback">💡</span>
+                    {problem?.title} Feedback <span role="img" aria-label="feedback">💡</span>
                 </DialogTitle>
                 <DialogContent dividers>
                     <Typography variant="body1" color="text.secondary" gutterBottom>
@@ -269,7 +326,15 @@ function Practice() {
                         variant="outlined"
                         onClick={async () => {
                             setOpenFeedback(false);
-                            setOpenRecommendations(true);
+                        }}
+                    >
+                        Revise
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={async () => {
+                            setOpenFeedback(false);
+                            handleRecommendations();
                         }}
                     >
                         Next Problem
@@ -280,7 +345,7 @@ function Practice() {
             {/* 推荐题目选择弹窗 */}
             <Dialog
                 open={openRecommendations}
-                onClose={() => setOpenRecommendations(false)}
+                onClose={() => setRecommendations(false)}
                 fullWidth
                 maxWidth="sm"
             >
@@ -302,7 +367,7 @@ function Practice() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenRecommendations(false)}>Cancel</Button>
+                    <Button onClick={() => setRecommendations(false)}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </ThemeProvider>

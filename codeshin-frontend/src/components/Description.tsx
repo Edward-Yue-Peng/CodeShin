@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+// src/components/Description.tsx
+// 题目说明组件
+import React from 'react';
 import { Box, Typography, Paper, Divider, useTheme } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
-interface ProblemData {
+
+export interface ProblemData {
     id: number;
     title: string;
-    description: string;
+    description: string;// 这是Markdown格式
     difficulty: string;
     is_premium: boolean;
     acceptance_rate: number;
@@ -22,35 +24,15 @@ interface ProblemData {
     rating: number;
     similar_questions: string;
 }
+
 interface DescriptionProps {
-    problemID?: number;
+    problem: ProblemData | null;
+    loading: boolean;
+    error: string;
 }
 
-const Description: React.FC<DescriptionProps> = ({problemID}) => {
+const Description: React.FC<DescriptionProps> = ({ problem, loading, error }) => {
     const theme = useTheme();
-    const [problem, setProblem] = useState<ProblemData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        if (!problemID) return;
-        async function fetchProblem() {
-            try {
-                const response = await fetch(`${apiUrl}/api/problems/?id=${problemID}`);
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(errText);
-                }
-                const data = await response.json();
-                setProblem(data);
-            } catch (err: any) {
-                setError(err.message || 'Failed to fetch problem information');
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchProblem();
-    }, [problemID]);
 
     if (loading) {
         return (

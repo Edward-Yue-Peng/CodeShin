@@ -77,6 +77,40 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
 
     // ReactMarkdown 自定义组件
     const markdownComponents: Components = {
+        ol({ children, ...props }) {
+            return (
+                <Box
+                    component="ol"
+                    sx={{ pl: 2, m: 0 }}
+                    {...props}
+                >
+                    {children}
+                </Box>
+            );
+        },
+        ul({ children, ...props }) {
+            return (
+                <Box
+                    component="ul"
+                    sx={{ pl: 2, m: 0 }}
+                    {...props}
+                >
+                    {children}
+                </Box>
+            );
+        },
+        li({ children, ...props }) {
+            return (
+                <Typography
+                    component="li"
+                    variant="body2"
+                    sx={{ mb: 0.5 }}
+                    {...props}
+                >
+                    {children}
+                </Typography>
+            );
+        },
         pre({children }) {
             const codeElement = React.Children.only(children) as React.ReactElement<{
                 className?: string;
@@ -247,7 +281,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
                     onClick={handleSend}
                     disabled={loading}
                 >
-                    {loading ? 'Sending...' : 'Send'}
+                    {loading ? 'Waiting...' : 'Send'}
                 </Button>
             </Box>
         </Box>

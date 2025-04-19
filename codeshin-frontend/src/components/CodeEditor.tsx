@@ -9,7 +9,6 @@ import {
 import Editor from '@monaco-editor/react';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TerminalIcon from '@mui/icons-material/Terminal';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import SaveIcon from '@mui/icons-material/Save';
 import { useTheme } from '@mui/material/styles';
 import Split from 'react-split';

@@ -1,4 +1,6 @@
 // src/MobileWarning.tsx
+// 要求使用电脑端访问
+
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 

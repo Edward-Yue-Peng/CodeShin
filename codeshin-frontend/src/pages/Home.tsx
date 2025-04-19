@@ -1,3 +1,5 @@
+// src/pages/Home.tsx
+// 首页
 import React, {useState, useEffect, useContext} from 'react';
 import { Box, Button, Typography, ThemeProvider, CssBaseline, Paper } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
@@ -8,8 +10,6 @@ import NavBar from '../components/NavBar';
 import {UserContext} from "../context/UserContext";
 
 function Home() {
-    const [totalProblemsSolved, setTotalProblemsSolved] = useState(0);
-    const [userLevel, setUserLevel] = useState('Beginner');
 
     const navigate = useNavigate();
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
@@ -22,10 +22,6 @@ function Home() {
         },
     });
 
-    useEffect(() => {
-        setTotalProblemsSolved(42);
-        setUserLevel('Intermediate');
-    }, []);
 
     const pages = ['Practice','Home',  'History'];
 
@@ -58,12 +54,13 @@ function Home() {
                     <Typography variant="h5" color="text.secondary" gutterBottom>
                         Enhance your coding skills with practice.
                     </Typography>
-                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 500 }}>
-                        Problems solved: <strong>{totalProblemsSolved}</strong>
-                    </Typography>
-                    <Typography variant="h6" sx={{ mt: 1, fontWeight: 500 }}>
-                        Current Level: <strong>{userLevel}</strong>
-                    </Typography>
+                {/*TODO 暂时隐藏，首页信息待定*/}
+                    {/*<Typography variant="h6" sx={{ mt: 2, fontWeight: 500 }}>*/}
+                    {/*    Problems solved: <strong>{totalProblemsSolved}</strong>*/}
+                    {/*</Typography>*/}
+                    {/*<Typography variant="h6" sx={{ mt: 1, fontWeight: 500 }}>*/}
+                    {/*    Current Level: <strong>{userLevel}</strong>*/}
+                    {/*</Typography>*/}
                     <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
                         <Button variant="contained" color="primary" size="large" onClick={() => navigate('/practice')}>
                             Practice

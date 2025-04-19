@@ -1,3 +1,6 @@
+// src/components/NavBar.tsx
+// 导航栏组件
+
 import React, {useContext} from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -14,7 +17,6 @@ import MenuItem from '@mui/material/MenuItem';
 import { useTheme } from '@mui/material/styles';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import SettingsIcon from '@mui/icons-material/Settings';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
@@ -183,7 +185,7 @@ const NavBar: React.FC<NavBarProps> = ({
                             <LogoutIcon />
                         </IconButton>
                     </Tooltip>
-                    {/* 显示用户名，如果存在的话 */}
+                    {/* 用户名 */}
                     {username && (
                         <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
                             {username}

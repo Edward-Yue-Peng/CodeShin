@@ -7,8 +7,7 @@ import MobileWarning from './pages/MobileWarning';
 import OrientationGuard from './OrientationGuard';
 import './index.css';
 import History from "./pages/History";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import Login from "./pages/Login";
 import { UserProvider } from './context/UserContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
@@ -19,12 +18,11 @@ root.render(
                 <OrientationGuard>
                     <Routes>
                         <Route path="/mobile" element={<MobileWarning />} />
-                        <Route path="/" element={<LoginPage />} />
-                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/" element={<Login />} />
+                        <Route path="/login" element={<Login />} />
                         <Route path="/home" element={<Home />} />
                         <Route path="/practice" element={<Practice />} />
                         <Route path="/history" element={<History />} />
-                        <Route path="/register" element={<RegisterPage />} />
                     </Routes>
                 </OrientationGuard>
             </HashRouter>

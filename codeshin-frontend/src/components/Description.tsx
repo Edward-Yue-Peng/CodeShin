@@ -7,7 +7,7 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 interface ProblemData {
     id: number;
     title: string;
-    description: string; // Markdown formatted problem description
+    description: string;
     difficulty: string;
     is_premium: boolean;
     acceptance_rate: number;

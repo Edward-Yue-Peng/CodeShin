@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+// src/components/CodeEditor.tsx
+// 代码编辑组件
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Box,
     IconButton,
@@ -12,24 +14,27 @@ import { useTheme } from '@mui/material/styles';
 import Split from 'react-split';
 
 interface CodeEditorProps {
+    // 传入上次的代码（数据库里保存的）
     autoSaveCode?: string;
+    // 实时回传代码
     onCodeChange?: (code: string) => void;
+    // 保存代码并写入数据库
     onSave?: (code: string) => Promise<void>;
-    onTaskAltClick?: () => void;  // 新增的回调属性，用于 TaskAltIcon 按钮点击
+    // 提交代码事件
+    onSubmit?: () => void;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
                                                    autoSaveCode,
                                                    onCodeChange,
                                                    onSave,
-                                                   onTaskAltClick,
+                                                   onSubmit,
                                                }) => {
     const theme = useTheme();
     const monacoTheme = theme.palette.mode === 'dark' ? 'vs-dark' : 'vs-light';
-
     const [code, setCode] = useState(autoSaveCode || '');
     const codeRef = useRef<string>(code);
-
+    // 加载初始代码
     useEffect(() => {
         setCode(autoSaveCode || '');
     }, [autoSaveCode]);
@@ -39,6 +44,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         codeRef.current = code;
     }, [code]);
 
+    // 阻止默认 Ctrl+S 保存事件，改为我们的保存逻辑
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if ((event.ctrlKey || event.metaKey) && event.key === 's') {
@@ -52,6 +58,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         };
     }, [onSave]);
 
+    // Terminal和编辑器的变量
     const [terminalOutput, setTerminalOutput] = useState('');
     const [showTerminal, setShowTerminal] = useState(false);
     const [pyodide, setPyodide] = useState<any>(null);
@@ -102,14 +109,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         setShowTerminal(true);
     };
 
-    // 当编辑器内容变化时，更新本地状态并调用 onCodeChange（若存在）
     const handleCodeChange = (value: string | undefined) => {
         const newCode = value || '';
         setCode(newCode);
         if (onCodeChange) onCodeChange(newCode);
     };
 
-    // 子组件内部调用父组件传入的回调
     const handleLocalSave = async () => {
         if (onSave) await onSave(code);
     };
@@ -136,13 +141,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
                 <IconButton size="small" color="inherit" onClick={handleLocalSave}>
                     <SaveIcon />
                 </IconButton>
-                {/* 修改 TaskAltIcon 按钮，点击时调用父组件传入的 onTaskAltClick */}
                 <IconButton
                     size="small"
                     color="primary"
                     sx={{ ml: 'auto' }}
                     onClick={() => {
-                        if (onTaskAltClick) onTaskAltClick();
+                        if (onSubmit) onSubmit();
                     }}
                 >
                     <TaskAltIcon />

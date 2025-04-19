@@ -1,15 +1,16 @@
 // src/pages/Practice.tsx
+// 练习页面
 import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
-import { Box, IconButton, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
+import { Box, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import Split from 'react-split';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import NavBar from '../components/NavBar';
 import Description from '../components/Description';
 import { UserContext } from '../context/UserContext';
-
 const CodeEditor = lazy(() => import('../components/CodeEditor'));
 const AIPanel = lazy(() => import('../components/AIPanel'));
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
+// 后端的API地址，在.env文件中配置
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Practice() {
     const { user } = useContext(UserContext);
@@ -24,9 +25,9 @@ function Practice() {
     const [openFeedback, setOpenFeedback] = useState(false);
 
     // 初始获取用户进度、代码和题目
-    const fetchData = async () => {
+    const fetchUserData = async () => {
         try {
-            const response = await fetch(`${apiUrl}/api/get_progress_and_code/?user_id=${user?.userId}`, {
+            const response = await fetch(`${API_URL}/api/get_progress_and_code/?user_id=${user?.userId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -43,16 +44,17 @@ function Practice() {
             console.error('GET 请求出错:', error);
         }
     };
-
+    // 当用户加载的时候自动获取进度
     useEffect(() => {
         if (user?.userId) {
-            fetchData();
+            fetchUserData();
         }
     }, [user]);
 
+    // 保存代码
     const handleSave = async (currentCode: string) => {
         try {
-            const response = await fetch(`${apiUrl}/api/autosave_code/`, {
+            const response = await fetch(`${API_URL}/api/autosave_code/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -71,6 +73,7 @@ function Practice() {
         }
     };
 
+    // 用户发送消息给AI
     const handleSendAIPanelMessage = async (message: string): Promise<string> => {
         try {
             const payload = {
@@ -79,7 +82,7 @@ function Practice() {
                 message,
                 code:code||'',
             };
-            const response = await fetch(`${apiUrl}/api/gpt_interaction/`, {
+            const response = await fetch(`${API_URL}/api/gpt_interaction/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -96,10 +99,11 @@ function Practice() {
         }
     };
 
+    // TODO 重写
     // 用户在推荐对话框中选择题目后，更新题目和代码
     const handleRecommendationSelect = async (selectedId: number) => {
         try {
-            const response = await fetch(`${apiUrl}/api/problems/?id=${selectedId}`);
+            const response = await fetch(`${API_URL}/api/problems/?id=${selectedId}`);
             if (!response.ok) {
                 const errText = await response.text();
                 throw new Error(errText);
@@ -114,13 +118,16 @@ function Practice() {
         }
     };
 
+    // TODO 重写
     const handleCloseSnackbar = () => {
         setOpenSnackbar(false);
     };
 
+    // 提交代码
     const handleSubmit = async () => {
         try {
-            const response = await fetch(`${apiUrl}/api/submit_code/`, {
+            // TODO 提交后应该有UI提示
+            const response = await fetch(`${API_URL}/api/submit_code/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -136,10 +143,8 @@ function Practice() {
 
             const data = await response.json();
             console.log("Submission result:", data);
-            setRecommendedProblems(data.recommendations || []);
             setFeedback(data.feedback || '');
             setScore(data.score);
-            setOpenFeedback(true);
         } catch (error: any) {
             alert("Submission failed: " + error.message);
         }
@@ -208,7 +213,7 @@ function Practice() {
                                 autoSaveCode={code}
                                 onCodeChange={setCode}
                                 onSave={handleSave}
-                                onTaskAltClick={handleSubmit} // 将新的回调传递给 CodeEditor
+                                onSubmit={handleSubmit}
                             />
                         </Suspense>
                     </Box>
@@ -229,7 +234,7 @@ function Practice() {
                 </Split>
             </Box>
 
-            {/* 保存成功提示 */}
+            {/* 保存成功弹窗 */}
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={3000}
@@ -241,7 +246,7 @@ function Practice() {
                 </Alert>
             </Snackbar>
 
-            {/* 反馈对话框 */}
+            {/* 提交后的反馈对话框 */}
             <Dialog
                 open={openFeedback}
                 onClose={() => setOpenFeedback(false)}

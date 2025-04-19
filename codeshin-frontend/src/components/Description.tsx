@@ -1,7 +1,8 @@
 // src/components/Description.tsx
 // 题目说明组件
 import React, { useMemo } from 'react';
-import { Box, Typography, Paper, Divider, useTheme } from '@mui/material';
+import { Box, Typography, Paper, Divider, useTheme, Chip, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -36,6 +37,7 @@ interface DescriptionProps {
 const Description: React.FC<DescriptionProps> = ({ problem, loading, error }) => {
     const theme = useTheme();
 
+    // 加载中的画面
     if (loading) {
         return (
             <Paper elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: theme.palette.background.paper, p: 2, alignItems: 'center', justifyContent: 'center' }}>
@@ -110,11 +112,21 @@ const Description: React.FC<DescriptionProps> = ({ problem, loading, error }) =>
 
     return (
         <Paper elevation={3} sx={{height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: theme.palette.background.paper, p: 2 }}>
-            <Box sx={{ flexGrow: 1, overflowY: 'auto'}}>
+            <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
 
                 {/* 标题与难度 */}
-                <Typography variant="h5" fontWeight="bold" gutterBottom>{problem.title}</Typography>
-                <Typography variant="subtitle1" color="text.secondary" gutterBottom>{problem.difficulty}</Typography>
+                <Typography variant="h5" fontWeight="bold" gutterBottom>
+                    {problem.title}
+                </Typography>
+                {/* 相关话题 标签 */}
+                {problem.related_topics.length > 0 && (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                        <Chip key={problem.difficulty} label={problem.difficulty} size="small" color={"primary"}/>
+                        {problem.related_topics.map(topic => (
+                            <Chip key={topic} label={topic} size="small" />
+                        ))}
+                    </Box>
+                )}
                 <Divider sx={{ my: 2 }} />
 
                 {/* 问题描述 */}
@@ -143,46 +155,42 @@ const Description: React.FC<DescriptionProps> = ({ problem, loading, error }) =>
                 {/* 问题限制块 */}
                 {constraints && (
                     <Box sx={{ mb: 2 }}>
-                        <Typography variant="subtitle1" fontWeight="bold" color="primary" gutterBottom>
+                        <Typography variant="subtitle1" fontWeight="bold" color="error" gutterBottom>
                             Constraints
                         </Typography>
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, backgroundColor: theme.palette.action.hover }}>
                             <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={markdownComponents}>
                                 {constraints}
                             </ReactMarkdown>
-                        </Paper>
                     </Box>
                 )}
 
-                <Divider sx={{ my: 2 }} />
+                {/* 可折叠块：统计信息 & 相似题目 */}
+                <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="subtitle1" fontWeight="bold">Problem Data</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        {/* 统计信息 */}
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+                            <Typography variant="body2">Acceptance Rate: {problem.acceptance_rate}%</Typography>
+                            <Typography variant="body2">Submissions: {problem.submissions}</Typography>
+                            <Typography variant="body2">Accepted: {problem.accepted}</Typography>
+                            <Typography variant="body2">Discussion Count: {problem.discuss_count}</Typography>
+                            <Typography variant="body2">Likes: {problem.likes}</Typography>
+                            <Typography variant="body2">Dislikes: {problem.dislikes}</Typography>
+                            <Typography variant="body2">Rating: {problem.rating}</Typography>
+                            <Typography variant="body2">Frequency: {problem.frequency}</Typography>
+                        </Box>
 
-                {/* 统计信息 */}
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-                    <Typography variant="body2">Acceptance Rate: {problem.acceptance_rate}%</Typography>
-                    <Typography variant="body2">Submissions: {problem.submissions}</Typography>
-                    <Typography variant="body2">Accepted: {problem.accepted}</Typography>
-                    <Typography variant="body2">Discussion Count: {problem.discuss_count}</Typography>
-                    <Typography variant="body2">Likes: {problem.likes}</Typography>
-                    <Typography variant="body2">Dislikes: {problem.dislikes}</Typography>
-                    <Typography variant="body2">Rating: {problem.rating}</Typography>
-                    <Typography variant="body2">Frequency: {problem.frequency}</Typography>
-                </Box>
-
-                {/* 相关话题 */}
-                {problem.related_topics.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle1" fontWeight="bold">Related Topics:</Typography>
-                        <Typography variant="body2">{problem.related_topics.join(', ')}</Typography>
-                    </Box>
-                )}
-
-                {/* 相似题目 */}
-                {problem.similar_questions && (
-                    <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle1" fontWeight="bold">Similar Questions:</Typography>
-                        <Typography variant="body2">{problem.similar_questions}</Typography>
-                    </Box>
-                )}
+                        {/* 相似题目 */}
+                        {problem.similar_questions && (
+                            <Box sx={{ mt: 1 }}>
+                                <Typography variant="subtitle1" fontWeight="bold">Similar Questions:</Typography>
+                                <Typography variant="body2">{problem.similar_questions}</Typography>
+                            </Box>
+                        )}
+                    </AccordionDetails>
+                </Accordion>
 
             </Box>
         </Paper>

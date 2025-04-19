@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Box,
+    Button,
     IconButton,
 } from '@mui/material';
 import Editor from '@monaco-editor/react';
@@ -141,16 +142,17 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
                 <IconButton size="small" color="inherit" onClick={handleLocalSave}>
                     <SaveIcon />
                 </IconButton>
-                <IconButton
+                <Button
                     size="small"
                     color="primary"
+                    variant="outlined"
                     sx={{ ml: 'auto' }}
                     onClick={() => {
                         if (onSubmit) onSubmit();
                     }}
                 >
-                    <TaskAltIcon />
-                </IconButton>
+                    SUBMIT
+                </Button>
             </Box>
 
             {/* 编辑器与终端区域 */}

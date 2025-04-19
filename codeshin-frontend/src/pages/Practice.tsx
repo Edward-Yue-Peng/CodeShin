@@ -1,6 +1,6 @@
 // src/pages/Practice.tsx
 import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
-import { Box, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
+import { Box, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, CircularProgress } from '@mui/material';
 import Split from 'react-split';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import NavBar from '../components/NavBar';
@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Practice() {
     const { user } = useContext(UserContext);
-    const pages = ['Practice', 'Home', 'Analysis'];
+    const pages = ['Practice', 'Home', 'History'];
     const [code, setCode] = useState<string>("");
     const [problemID, setProblemID] = useState<number>(0);
     const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -22,6 +22,7 @@ function Practice() {
     const [score, setScore] = useState<number>(-1);
     const [openRecommendations, setRecommendations] = useState(false);
     const [openFeedback, setOpenFeedback] = useState(false);
+    const [loadingFeedback, setLoadingFeedback] = useState<boolean>(false);
 
     const [problem, setProblem] = useState<ProblemData | null>(null);
     const [loadingProblem, setLoadingProblem] = useState<boolean>(false);
@@ -91,7 +92,7 @@ function Practice() {
                 body: JSON.stringify({
                     user_id: user?.userId,
                     problem_id: problemID,
-                    autosave_code: currentCode || "",
+                    autosave_code: currentCode || " ",
                 }),
             });
             if (!response.ok) {
@@ -159,6 +160,9 @@ function Practice() {
 
     // 提交代码
     const handleSubmit = async () => {
+        setOpenFeedback(true);
+        // 先搞个反馈动画
+        setLoadingFeedback(true);
         try {
             const response = await fetch(`${API_URL}/api/submit_code/`, {
                 method: 'POST',
@@ -166,7 +170,7 @@ function Practice() {
                 body: JSON.stringify({
                     user_id: user?.userId,
                     problem_id: problemID,
-                    solution_code: code,
+                    solution_code: code || ' ',
                 }),
             });
             if (!response.ok) {
@@ -177,9 +181,10 @@ function Practice() {
             const data = await response.json();
             setFeedback(data.feedback || '');
             setScore(data.score);
-            setOpenFeedback(true);
         } catch (error: any) {
             alert("Submission failed: " + error.message);
+        } finally {
+            setLoadingFeedback(false);
         }
     };
 
@@ -317,31 +322,40 @@ function Practice() {
                 maxWidth="sm"
             >
                 <DialogTitle>
-                    {problem?.title} Feedback <span role="img" aria-label="feedback">💡</span>
+                    <span role="img" aria-label="feedback">💡</span>Feedback of {problem?.title}
                 </DialogTitle>
                 <DialogContent dividers>
-                    <Typography variant="body1" color="text.secondary" gutterBottom>
-                        {feedback}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        <strong>The score you gained: </strong> {score}
-                    </Typography>
+                    {/*反馈动画*/}
+                    {loadingFeedback ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        <>
+                            <Typography variant="body1" color="text.secondary" gutterBottom>
+                                {feedback}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                <strong>The score you gained: </strong> {score}
+                            </Typography>
+                        </>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button
                         variant="outlined"
-                        onClick={async () => {
-                            setOpenFeedback(false);
-                        }}
+                        onClick={() => setOpenFeedback(false)}
+                        disabled={loadingFeedback}
                     >
                         Revise
                     </Button>
                     <Button
                         variant="contained"
-                        onClick={async () => {
+                        onClick={() => {
                             setOpenFeedback(false);
                             handleRecommendations();
                         }}
+                        disabled={loadingFeedback}
                     >
                         Next Problem
                     </Button>

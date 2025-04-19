@@ -27,7 +27,7 @@ function Home() {
         setUserLevel('Intermediate');
     }, []);
 
-    const pages = ['Practice','Home',  'Analysis'];
+    const pages = ['Practice','Home',  'History'];
 
     return (
         <ThemeProvider theme={theme}>

@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import MobileWarning from './pages/MobileWarning';
 import OrientationGuard from './OrientationGuard';
 import './index.css';
-import Analysis from "./pages/Analysis";
+import History from "./pages/History";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import { UserProvider } from './context/UserContext';
@@ -23,7 +23,7 @@ root.render(
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/home" element={<Home />} />
                         <Route path="/practice" element={<Practice />} />
-                        <Route path="/analysis" element={<Analysis />} />
+                        <Route path="/history" element={<History />} />
                         <Route path="/register" element={<RegisterPage />} />
                     </Routes>
                 </OrientationGuard>

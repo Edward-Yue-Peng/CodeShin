@@ -68,8 +68,8 @@ function Home() {
                         <Button variant="contained" color="primary" size="large" onClick={() => navigate('/practice')}>
                             Practice
                         </Button>
-                        <Button variant="outlined" color="primary" size="large" onClick={() => navigate('/analysis')}>
-                            Analysis
+                        <Button variant="outlined" color="primary" size="large" onClick={() => navigate('/history')}>
+                            History
                         </Button>
                     </Box>
             </Box>

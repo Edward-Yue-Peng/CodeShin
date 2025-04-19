@@ -17,7 +17,7 @@ function Practice() {
     const [code, setCode] = useState<string>("");
     const [problemID, setProblemID] = useState<number>(0);
     const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [recommendedProblems, setRecommendedProblems] = useState<number[]>([]);
+    const [recommendedProblems, setRecommendedProblems] = useState<ProblemData[]>([]);
     const [feedback, setFeedback] = useState<string>("");
     const [score, setScore] = useState<number>(-1);
     const [openRecommendations, setRecommendations] = useState(false);
@@ -149,10 +149,13 @@ function Practice() {
         }
     };
 
-    // TODO 重写
-    const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
-    };
+    // 获取单个题目详情
+    async function fetchSingleProblemDetail(pid: number): Promise<ProblemData> {
+        const res = await fetch(`${API_URL}/api/problems/?id=${pid}`);
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+    }
+
 
     // 提交代码
     const handleSubmit = async () => {
@@ -195,13 +198,16 @@ function Practice() {
                 const errText = await response.text();
                 throw new Error(errText);
             }
-            const data = await response.json();
-            setRecommendedProblems(data.recommendations);
+            const data: { recommendations: number[] } = await response.json();
+            const details: ProblemData[] = await Promise.all(
+                data.recommendations.map((pid) => fetchSingleProblemDetail(pid))
+            );
+            setRecommendedProblems(details);
             setRecommendations(true);
         } catch (error: any) {
             alert('Failed to load recommendations: ' + error.message);
         }
-    }
+    };
 
     // 布局相关状态
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
@@ -295,10 +301,10 @@ function Practice() {
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
+                onClose={()=>setOpenSnackbar(false)}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                <Alert onClose={handleCloseSnackbar} severity="info">
+                <Alert onClose={()=>setOpenSnackbar(false)} severity="info">
                     Saved
                 </Alert>
             </Snackbar>
@@ -352,14 +358,14 @@ function Practice() {
                 <DialogTitle>Select a Recommended Problem</DialogTitle>
                 <DialogContent>
                     {recommendedProblems && recommendedProblems.length > 0 ? (
-                        recommendedProblems.map((pid) => (
+                        recommendedProblems.map((p) => (
                             <Button
-                                key={pid}
-                                onClick={() => handleRecommendationSelect(pid)}
+                                key={p.id}
+                                onClick={() => handleRecommendationSelect(p.id)}
                                 fullWidth
                                 sx={{ my: 1 }}
                             >
-                                Problem {pid}
+                                Problem {p.id}: {p.title}
                             </Button>
                         ))
                     ) : (

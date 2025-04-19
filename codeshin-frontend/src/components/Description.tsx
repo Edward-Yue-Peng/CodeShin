@@ -98,7 +98,7 @@ const Description: React.FC<DescriptionProps> = ({ problem, loading, error }) =>
         );
     }
 
-    // Custom Markdown code renderer
+    // Markdown处理
     const renderers = {
         code({ node, inline, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || '');

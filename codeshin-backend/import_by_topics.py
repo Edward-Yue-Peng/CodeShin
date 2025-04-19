@@ -59,4 +59,4 @@ def import_sorted_topics(csv_file_path):
                     print(f"  [ERROR] Problem with ID {problem_id} does not exist (Hard)")
 
 # 调用函数
-import_sorted_topics('/Users/66west/Lions/yuanshen/Database_prep/sorted_topics_id.csv')
+import_sorted_topics(f'{os.path.dirname(os.path.realpath(__file__))}/Database_prep/sorted_topics_id.csv')

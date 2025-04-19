@@ -89,7 +89,7 @@ const NavBar: React.FC<NavBarProps> = ({
                 borderBottom: `1px solid ${theme.palette.divider}`,
             }}
         >
-            <Container maxWidth="xl">
+            <Container maxWidth={false}>
                 <Toolbar disableGutters>
                     {/* 左侧 Logo */}
                     <IconButton color="inherit" sx={{ mr: 2 }}>

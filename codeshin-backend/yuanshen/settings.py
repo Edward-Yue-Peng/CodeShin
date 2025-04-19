@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-utb#71mr*)6*yc4w&4d*g1=ghy10o@h-4fjqs0gy1yc_&+vsg("
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -82,8 +82,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "yuan_database",
-        "USER": "yuan_user",
-        "PASSWORD": "yuanshen_qidong",
+        "USER": "yuanshen",
+        "PASSWORD": "yuanshenqidong",
         "HOST": "localhost",  # 或者数据库服务器的IP地址
         "PORT": "3306",  # MySQL默认端口
         "OPTIONS": {
@@ -143,4 +143,4 @@ MODEL = credentials["model"]
 URL = credentials["base_url"]
 
 # 基础 URL
-BASE_URL = "http://127.0.0.1:8000/"  # 替换为实际域名或 IP 地址
+BASE_URL = "http://127.0.0.1:8000"

@@ -20,25 +20,23 @@ export const UserContext = createContext<UserContextType>({
 });
 
 // @ts-ignore
-export const UserProvider: FC<UserProviderProps> = ({ children }) => {
+export const UserProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     const [user, setUserState] = useState<User | null>(null);
+    const [ready, setReady] = useState(false);
 
-    // 尝试从 localStorage 中加载用户信息
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUserState(JSON.parse(storedUser));
-        }
+        const stored = localStorage.getItem('user');
+        if (stored) setUserState(JSON.parse(stored));
+        setReady(true);
     }, []);
 
-    const setUser = (user: User | null) => {
-        setUserState(user);
-        if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
-        } else {
-            localStorage.removeItem('user');
-        }
+    const setUser = (u: User | null) => {
+        setUserState(u);
+        u ? localStorage.setItem('user', JSON.stringify(u))
+            : localStorage.removeItem('user');
     };
+
+    if (!ready) return null;
 
     return (
         <UserContext.Provider value={{ user, setUser }}>
@@ -46,3 +44,4 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
         </UserContext.Provider>
     );
 };
+

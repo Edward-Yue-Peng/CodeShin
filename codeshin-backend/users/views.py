@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator, EmptyPage
 from django.conf import settings
+
+from utils.ai_interaction import prompt_interaction
 from .models import (
     Problem, UserHistory, AutosaveCode, UserTopicMastery, Recommendation,
     GptConversation, ConversationSession, Topic, TopicProblem, RecommendationLog
@@ -64,7 +66,7 @@ def user_login(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return JsonResponse({'message': 'Login successful'}, status=200)
+            return JsonResponse({'message': 'Login successful', 'userid': user.id}, status=200)
         else:
             return JsonResponse({'error': 'Invalid credentials'}, status=400)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
@@ -722,6 +724,7 @@ def gpt_interaction_api(request):
             user_id = data.get('user_id')
             problem_id = data.get('problem_id')
             user_message = data.get('message')
+            user_code = data.get('code')
             conversation_type = "user"
 
             if not user_id or not problem_id or not user_message:
@@ -760,21 +763,22 @@ def gpt_interaction_api(request):
 
             description = problem.description
             # 将最新的用户消息添加到对话历史中
-            messages.append({"role": "user", "content": user_message})
+            messages.append({"role": "user", "content": prompt_interaction(user_message, description, user_code)})
 
             # 调用 GPT API 获取回复
-            gpt_api_url = "https://api.openai.com/v1/chat/completions"
+            gpt_api_url = settings.URL
             gpt_payload = {
-                "model": settings.GPT_MODEL,
-                "messages": messages
+                "model": settings.MODEL,
+                "messages": messages,
+                "stream": False
             }
             gpt_headers = {
-                "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
+                "Authorization": f"Bearer {settings.API_KEY}",
                 "Content-Type": "application/json"
             }
 
             try:
-                gpt_response = requests.post(gpt_api_url, json=gpt_payload, headers=gpt_headers)
+                gpt_response = requests.post(gpt_api_url + "/chat/completions", json=gpt_payload, headers=gpt_headers)
                 gpt_response.raise_for_status()
                 gpt_reply = gpt_response.json()["choices"][0]["message"]["content"]
 

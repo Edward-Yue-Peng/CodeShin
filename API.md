@@ -69,7 +69,8 @@
     - 响应体:
         ```json
         {
-            "message": "Login successful"
+            "message": "Login successful",
+            "user_id": 1
         }
         ```
 - **失败**:
@@ -194,8 +195,7 @@
                 "dislikes": 321,
                 "rating": 4.2,
                 "similar_questions": "Two Sum, Four Sum"
-            },
-            // ... 更多题目
+            }
         ]
         ```
 - **失败**:
@@ -232,7 +232,7 @@
     - 响应体:
         ```json
         {
-            "problem_difficulty": string
+            "problem_difficulty": 3
         }
         ```
 - **失败**:
@@ -256,12 +256,11 @@
 - **请求体**:
     ```json
     {
-        "user_id": integer,  // 用户的唯一标识符
-        "problem_id": integer,  // 题目的唯一标识符
-        "solution_code": string,  // 用户提交的解答代码
-        "is_passed": boolean,  // (可选，默认为 False) 指示代码是否通过了所有测试用例。
-                               // 这个字段的值可能会被 GPT 的评估结果覆盖或作为初始参考。
-        "submission_status": string  // (可选) 用户提交的状态，例如 "Accepted", "Failed", "Error" 等。
+        "user_id": 1,
+        "problem_id": 2,
+        "solution_code": "print(hello world)",
+        "is_passed": true,
+        "submission_status": "accepted"
     }
     ```
 
@@ -272,9 +271,9 @@
         ```json
         {
             "message": "Code submitted and scored successfully",
-            "version": integer,  // 本次提交的代码版本号
-            "score": float or null,  // GPT 模型给出的代码评分 (0-1 之间)，可能为 null
-            "feedback": string  // GPT 模型对代码的反馈
+            "version": 2,
+            "score": 45, 
+            "feedback": "great"
         }
         ```
 - **失败**:
@@ -282,7 +281,7 @@
     - 响应体:
         ```json
         {
-            "error": "..."  // 包含具体的错误信息
+            "error": "..."
         }
         ```
     - 状态码: `404 Not Found`
@@ -296,7 +295,7 @@
     - 响应体:
         ```json
         {
-            "error": "..."  // 包含具体的错误信息
+            "error": "..."
         }
         ```
 - **方法不允许**:
@@ -320,8 +319,8 @@
 - **请求体**:
     ```json
     {
-        "user_id": integer,
-        "problem_id": integer,
+        "user_id": 3,
+        "problem_id": 2
     }
     ```
 
@@ -340,7 +339,7 @@
     - 响应体:
         ```json
         {
-            "error": "..."  // 包含具体的错误信息
+            "error": "..."
         }
         ```
     - 状态码: `404 Not Found`
@@ -354,7 +353,7 @@
     - 响应体:
         ```json
         {
-            "error": "..."  // 包含具体的错误信息
+            "error": "..."
         }
         ```
 - **方法不允许**:

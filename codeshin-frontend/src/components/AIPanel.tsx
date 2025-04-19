@@ -1,75 +1,159 @@
 // src/components/AIPanel.tsx
+// AI面板组件
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import {
+    oneDark,
+    oneLight
+} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+// 具体的API请求和处理逻辑在父组件中实现
 interface AIPanelProps {
     onSendMessage: (message: string) => Promise<string>;
 }
 
 const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
     const theme = useTheme();
-    const botBubbleColor = theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300';
-
-    const [messages, setMessages] = useState<{ sender: 'bot' | 'user'; text: string }[]>([
-        { sender: 'bot', text: 'Hello! How can I help you today?' },
-    ]);
+    // 根据主题模式动态设置 bot 气泡背景
+    const botBubbleColor =
+        theme.palette.mode === 'dark'
+            ? theme.palette.grey[800]
+            : theme.palette.grey[200];
+    // 根据主题模式动态选择代码高亮风格
+    const codeStyle = theme.palette.mode === 'dark' ? oneDark : oneLight;
+    // 初始消息
+    const [messages, setMessages] = useState<
+        { sender: 'bot' | 'user'; text: string }[]
+    >([{ sender: 'bot', text: 'Hello! How can I help you today?' }]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSend = async () => {
         if (!input.trim() || loading) return;
 
-        // （可选）若需要在发送时清空对话框
-        // setMessages([]);
+        // 添加用户消息，还有AI的占位消息
+        setMessages(prev => [
+            ...prev,
+            { sender: 'user', text: input },
+            { sender: 'bot',  text: 'I am thinking...' }
+        ]);
         setInput('');
-        // 先加入用户消息
-        setMessages((prev) => [...prev, { sender: 'user', text: input }]);
         setLoading(true);
-
         try {
             const reply = await onSendMessage(input);
-            setMessages((prev) => [...prev, { sender: 'bot', text: reply }]);
+            // 收到回复后，用真正内容替换那条消息
+            setMessages(prev => {
+                const idx = prev.length - 1;
+                const newMsgs = [...prev];
+                newMsgs[idx] = { sender: 'bot', text: reply };
+                return newMsgs;
+            });
         } catch (error: any) {
-            setMessages((prev) => [
-                ...prev,
-                { sender: 'bot', text: `Error: ${error.message}` },
-            ]);
+            setMessages(prev => {
+                const idx = prev.length - 1;
+                const newMsgs = [...prev];
+                newMsgs[idx] = { sender: 'bot', text: `Error: ${error.message}` };
+                return newMsgs;
+            });
         } finally {
             setLoading(false);
         }
     };
 
+    // 清空聊天记录，但是现在只是前端清空
     const handleNewChat = () => {
         setMessages([]);
         setInput('');
     };
 
+    // 预设Prompt，TODO，待完善
     const handleSamplePrompt = () => {
-        setInput('Explain the merge sort algorithm.');
+        setInput('Give me some hints.');
     };
 
+    // ReactMarkdown 自定义组件
+    const markdownComponents: Components = {
+        pre({children }) {
+            const codeElement = React.Children.only(children) as React.ReactElement<{
+                className?: string;
+                children: React.ReactNode;
+            }>;
+            const match = /language-(\w+)/.exec(codeElement.props.className || '');
+            if (match) {
+                // 检测到编程语言，进行高亮
+                return (
+                    <SyntaxHighlighter
+                        style={codeStyle}
+                        language={match[1]}
+                        PreTag="div"
+                    >
+                        {String(codeElement.props.children).trim()}
+                    </SyntaxHighlighter>
+                );
+            }
+            // 返回普通样式
+            return <pre>{children}</pre>;
+        },
+        code({ node, className, children, ...props }) {
+            // 行内代码或无语言标记的 code
+            return (
+                <code
+                    className={className}
+                    {...props}
+                    style={{
+                        background:
+                            theme.palette.mode === 'dark' ? '#2e2e2e' : '#f5f5f5',
+                        padding: '0.2em 0.4em',
+                        borderRadius: '3px',
+                        wordBreak: 'break-word'
+                    }}
+                >
+                    {children}
+                </code>
+            );
+        },
+        img({ node, ...props }) {
+            return (
+                <img
+                    alt={"a picture"}
+                    style={{ maxWidth: '100%', height: 'auto' }}
+                    {...props}
+                />
+            );
+        }
+    };
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            {/* 标题区域 */}
+            {/* 标题 */}
             <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="h6" align="center">CodeShinAI</Typography>
+                <Typography variant="h6" align="center">
+                    CodeShinAI
+                </Typography>
             </Box>
-            {/* 聊天记录区域 */}
-            <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto', backgroundColor: 'background.default' }}>
-                {messages.map((msg, index) => {
+
+            {/* 聊天记录 */}
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    p: 2,
+                    overflowY: 'auto',
+                    backgroundColor: 'background.default'
+                }}
+            >
+                {messages.map((msg, idx) => {
                     const isUser = msg.sender === 'user';
-                    // @ts-ignore
-                    // @ts-ignore
                     return (
                         <Box
-                            key={index}
+                            key={idx}
                             sx={{
                                 display: 'flex',
                                 justifyContent: isUser ? 'flex-end' : 'flex-start',
-                                mb: 1,
+                                mb: 1
                             }}
                         >
                             <Box
@@ -77,83 +161,72 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
                                     maxWidth: '70%',
                                     p: 1,
                                     borderRadius: 1,
-                                    bgcolor: isUser ? 'primary.main' : (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300'),
-                                    color: isUser ? 'primary.contrastText' : theme.palette.text.primary,
-                                    wordBreak: 'break-word',      // 对长单词进行换行
-                                    overflowWrap: 'break-word',   // 支持旧版浏览器
-                                    whiteSpace: 'pre-wrap',       // 保留换行符并允许自动换行
+                                    bgcolor: isUser ? 'primary.main' : botBubbleColor,
+                                    color: isUser
+                                        ? 'primary.contrastText'
+                                        : theme.palette.text.primary,
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    whiteSpace: 'pre-wrap'
                                 }}
                             >
                                 {msg.sender === 'bot' ? (
-                                    <Box sx={{ typography: 'body2', color: theme.palette.text.primary }}>
-                                        <ReactMarkdown
-                                            components={{
-                                                // 内联代码和代码块
-                                                code({ node, inline, className, children, ...props }) {
-                                                    return inline ? (
-                                                        <code
-                                                            style={{
-                                                                background: theme.palette.mode === 'dark' ? "#2e2e2e" : "#f5f5f5",
-                                                                padding: "0.2em 0.4em",
-                                                                borderRadius: "3px",
-                                                                wordBreak: "break-word",
-                                                            }}
-                                                            {...props}
-                                                        >
-                                                            {children}
-                                                        </code>
-                                                    ) : (
-                                                        <pre
-                                                            style={{
-                                                                overflowX: 'auto',        // 遇到过长的代码出现滚动条
-                                                                wordBreak: 'break-all',    // 允许在任何地方换行
-                                                                whiteSpace: 'pre-wrap',    // 保留换行符
-                                                                maxWidth: '100%',          // 限制最大宽度，始终在容器内
-                                                                background: theme.palette.mode === 'dark' ? "#2e2e2e" : "#f5f5f5",
-                                                                padding: "0.5em",
-                                                                borderRadius: "5px",
-                                                            }}
-                                                        >
-                            <code {...props}>{children}</code>
-                          </pre>
-                                                    );
-                                                },
-                                                // 图片渲染
-                                                img({ node, ...props }) {
-                                                    return <img style={{ maxWidth: '100%', height: 'auto' }} {...props} />;
-                                                },
-                                            }}
-                                        >
+                                    <Box
+                                        sx={{
+                                            typography: 'body2',
+                                            color: theme.palette.text.primary
+                                        }}
+                                    >
+                                        <ReactMarkdown components={markdownComponents}>
                                             {msg.text}
                                         </ReactMarkdown>
                                     </Box>
                                 ) : (
-                                    <Typography variant="body2">{msg.text}</Typography>
+                                    <Typography variant="body2">
+                                        {msg.text}
+                                    </Typography>
                                 )}
                             </Box>
                         </Box>
                     );
                 })}
             </Box>
-            {/* 快捷操作按钮 */}
+
+            {/* 操作按钮 */}
             <Box
                 sx={{
                     p: 1,
                     borderTop: '1px solid',
                     borderColor: 'divider',
                     display: 'flex',
-                    gap: 1,
+                    gap: 1
                 }}
             >
-                <Button variant="outlined" size="small" onClick={handleNewChat}>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleNewChat}
+                >
                     NEW CHAT
                 </Button>
-                <Button variant="outlined" size="small" onClick={handleSamplePrompt}>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleSamplePrompt}
+                >
                     HINT
                 </Button>
             </Box>
-            {/* 输入区 */}
-            <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex' }}>
+
+            {/* 输入区域 */}
+            <Box
+                sx={{
+                    p: 2,
+                    borderTop: '1px solid',
+                    borderColor: 'divider',
+                    display: 'flex'
+                }}
+            >
                 <TextField
                     fullWidth
                     variant="outlined"
@@ -168,7 +241,12 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
                         }
                     }}
                 />
-                <Button variant="contained" sx={{ ml: 1 }} onClick={handleSend} disabled={loading}>
+                <Button
+                    variant="contained"
+                    sx={{ ml: 1 }}
+                    onClick={handleSend}
+                    disabled={loading}
+                >
                     {loading ? 'Sending...' : 'Send'}
                 </Button>
             </Box>

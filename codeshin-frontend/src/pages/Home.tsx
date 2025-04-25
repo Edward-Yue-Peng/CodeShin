@@ -10,7 +10,7 @@ import {
     CardContent,
     Container,
 } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
@@ -19,21 +19,12 @@ import { UserContext } from '../context/UserContext';
 export default function Home() {
     const navigate = useNavigate();
     const { user } = useContext(UserContext);
+    const muiTheme = useTheme();
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const mode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
-
-    const theme = createTheme({
-        palette: {
-            mode,
-            primary: { main: '#3366FF' },
-            background: {
-                default: mode === 'light' ? '#F9FAFB' : '#111127',
-            },
-            text: { primary: mode === 'light' ? '#333' : '#EEE' },
-        },
-        typography: { fontFamily: 'Roboto, Helvetica, Arial, sans-serif' },
-    });
+    const effectiveMode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
+    const theme = createTheme({ palette: { mode: effectiveMode } });
 
     const pages = ['Practice', 'Home', 'History'];
     const features = [
@@ -52,8 +43,8 @@ export default function Home() {
     ];
     const stack = [
         { label: 'Frontend', detail: 'React & Material UI' },
-        { label: 'Backend', detail: 'Django & RESTful APIs' },
-        { label: 'Database', detail: 'MySQL for data persistence' },
+        { label: 'Backend', detail: 'Django' },
+        { label: 'Database', detail: 'MySQL' },
     ];
     const abstractText = `
 CodeShin is an AI-assisted code training platform offering personalized practice and feedback. 
@@ -118,10 +109,10 @@ Future work will integrate collaborative filtering and expand problem coverage.
                             variant="body1"
                             sx={{
                                 whiteSpace: 'pre-line',
-                                maxWidth: 800,
+                                maxWidth: 1000,
                                 mx: 'auto',
                                 textAlign: 'left',
-                                lineHeight: 1.6,
+                                lineHeight: 2,
                             }}
                         >
                             {abstractText}
@@ -145,10 +136,10 @@ Future work will integrate collaborative filtering and expand problem coverage.
                                         }}
                                     >
                                         <CardContent>
-                                            <Typography variant="h6" fontWeight={500} gutterBottom>
+                                            <Typography variant="subtitle1" align="center" fontWeight={600}>
                                                 {item.title}
                                             </Typography>
-                                            <Typography variant="body2" color="text.secondary">
+                                            <Typography variant="body2" align="center" color="text.secondary">
                                                 {item.desc}
                                             </Typography>
                                         </CardContent>

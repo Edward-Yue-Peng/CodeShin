@@ -368,61 +368,6 @@
 
 ---
 
-### 3. 获取用户所有题最近提交的分数
-
-- **URL**: `/api/autosave_code/`
-- **方法**: `GET`
-- **描述**: 获取用户所有题最近提交的分数。
-
-#### 请求
-- **请求头**: 无
-- **请求参数**:
-    - `user_id`（必填）：用户 ID。
-
-#### 响应
-- **成功**:
-    - 状态码: `200 OK`
-    - 响应体:
-        ```json
-        {
-            "last_scores": [
-                {
-                    "problem_id": 101,
-                    "score": 85
-                },
-                {
-                    "problem_id": 105,
-                    "score": 92
-                },
-                // ... 更多题目和最后得分
-            ]
-        }
-        ```
-- **失败**:
-    - 状态码: `400 Bad Request`
-    - 响应体:
-        ```json
-        {
-            "error": "Missing user_id"
-        }
-        ```
-    - 状态码: `400 Bad Request`
-    - 响应体:
-        ```json
-        {
-            "error": "Invalid user_id"
-        }
-        ```
-    - 状态码: `405 Method Not Allowed`
-    - 响应体:
-        ```json
-        {
-            "error": "Invalid request method"
-        }
-        ```
-
----
-
 ### 4. 自动保存代码
 - **URL**: `/api/autosave_code/`
 - **方法**: `POST`
@@ -908,13 +853,13 @@
 
 ### 2. 获取推荐题目
 - **URL**: `/api/get_recommendations/`
-- **方法**: [GET](http://_vscodecontentref_/11)
+- **方法**: `GET`
 - **描述**: 获取推荐的题目列表。
 
 #### 请求
 - **请求头**: 无
 - **请求参数**:
-    - [user_id](http://_vscodecontentref_/12)（必填）：用户 ID。
+    - `user_id`（必填）：用户 ID。
 
 #### 响应
 - **成功**:
@@ -1159,6 +1104,118 @@
         ```json
         {
             "error": "Missing user_id or problem_id"
+        }
+        ```
+
+---
+
+## 用户成长系统API
+### 1. 获取用户成长路径建议
+- **URL**: `/api/get_growth_path_advice/`
+- **方法**: `GET`
+- **描述**: 获取用户成长路径建议。
+
+#### 请求
+- **请求头**: 无
+- **请求参数**:
+    - `user_id`（必填）：用户 ID。
+
+#### 响应
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "suggestions": [
+                "建议一：关注基础知识的巩固。",
+                "建议二：尝试参与更复杂的项目。",
+                "建议三：积极与其他开发者交流学习。",
+                // ... 更多建议
+            ]
+        }
+        ```
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing user_id"
+        }
+        ```
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid user_id"
+        }
+        ```
+    - 状态码: `405 Method Not Allowed`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid request method"
+        }
+        ```
+    - 状态码: `500 Method Not Allowed`
+    - 响应体:
+        ```json
+        {
+            "error": "调用 GPT 服务失败，请稍后重试。"
+        }
+        ```
+
+---
+
+### 2. 获取用户最后一次得分
+
+- **URL**: `/api/get_user_last_scores/`
+- **方法**: `GET`
+- **描述**: 获取用户所有题最近提交的分数。
+
+#### 请求
+- **请求头**: 无
+- **请求参数**:
+    - `user_id`（必填）：用户 ID。
+
+#### 响应
+- **成功**:
+    - 状态码: `200 OK`
+    - 响应体:
+        ```json
+        {
+            "last_scores": [
+                {
+                    "problem_id": 101,
+                    "score": 85
+                },
+                {
+                    "problem_id": 105,
+                    "score": 92
+                },
+                // ... 更多题目和最后得分
+            ]
+        }
+        ```
+- **失败**:
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Missing user_id"
+        }
+        ```
+    - 状态码: `400 Bad Request`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid user_id"
+        }
+        ```
+    - 状态码: `405 Method Not Allowed`
+    - 响应体:
+        ```json
+        {
+            "error": "Invalid request method"
         }
         ```
 

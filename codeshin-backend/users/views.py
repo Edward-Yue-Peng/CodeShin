@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator, EmptyPage
 from django.conf import settings
+from django.db import models
 
 from utils.ai_interaction import prompt_interaction
 from .models import (
@@ -304,6 +305,45 @@ def autosave_code(request):
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+@csrf_exempt
+def get_user_last_scores(request):
+    """
+    获取用户历史上所有做过的题目的最后一次手动提交的分数
+    """
+    if request.method == 'GET':
+        user_id = request.GET.get('user_id')
+
+        if not user_id:
+            return JsonResponse({"error": "Missing user_id"}, status=400)
+
+        # 检查用户是否存在
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "Invalid user_id"}, status=400)
+
+        # 查询用户历史记录，按题目分组并获取每个题目的最后一次提交
+        history = (
+            UserHistory.objects.filter(user_id=user)
+            .values('problem_id')
+            .annotate(last_submission_id=models.Max('id'))  # 获取每个题目的最后一次提交的记录 ID
+        )
+
+        # 获取最后一次提交的分数和题目 ID
+        last_scores = []
+        for record in history:
+            last_submission = UserHistory.objects.filter(id=record['last_submission_id']).first()
+            if last_submission:
+                last_scores.append({
+                    "problem_id": last_submission.problem_id.id,
+                    "score": last_submission.score
+                })
+
+        return JsonResponse({"last_scores": last_scores}, status=200)
+
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 # 用户进度管理系统

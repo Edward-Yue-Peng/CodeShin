@@ -23,7 +23,9 @@ from .views import (
     create_conversation_session,
     gpt_interaction_api,
     get_gpt_conversations,
-    clear_gpt_conversations, call_recommender
+    clear_gpt_conversations, call_recommender,
+    get_growth_path_advice,
+    get_user_last_scores,
 )
 
 urlpatterns = [
@@ -34,7 +36,7 @@ urlpatterns = [
 
     # 题目管理系统
     path('problems/', get_problems, name='get_problems'),  # 获取题目数据
-    path('problem_difficulty/', get_problem_difficulty, name='get_problem_difficulty'),
+    path('problem_difficulty/', get_problem_difficulty, name='get_problem_difficulty'), # 获取题目难度
 
     # 代码管理系统
     path('submit_code/', submit_code, name='submit_code'),  # 提交代码
@@ -62,4 +64,9 @@ urlpatterns = [
     path('gpt_interaction/', gpt_interaction_api, name='gpt_interaction_api'),  # GPT 交互
     path('get_gpt_conversations/', get_gpt_conversations, name='get_gpt_conversations'),  # 获取对话记录
     path('clear_gpt_conversations/', clear_gpt_conversations, name='clear_gpt_conversations'),  # 清空对话记录
+
+    # 用户成长系统
+
+    path('api/get_growth_path_advice/', get_growth_path_advice, name='get_growth_path_advice'), # 获取用户成长路径建议
+    path('api/get_user_last_scores/', get_user_last_scores, name='get_user_last_scores'),  # 获取用户最后一次得分
 ]

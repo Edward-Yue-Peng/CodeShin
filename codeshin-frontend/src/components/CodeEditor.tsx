@@ -195,7 +195,7 @@ sys.stdout = StringIO()
                                 p: 1,
                                 backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#f5f5f5',
                                 color: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                                fontFamily: 'monospace',
+                                fontFamily: `'Fira Code', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace`,
                                 whiteSpace: 'pre-wrap',
                                 borderTop: '1px solid',
                                 borderColor: theme.palette.mode === 'dark' ? '#121212' : '#f5f5f5',

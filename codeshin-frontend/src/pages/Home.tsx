@@ -9,17 +9,18 @@ import {
     Card,
     CardContent,
     Container,
+    Fade,
 } from '@mui/material';
-import { createTheme, useTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import NavBar from '../components/NavBar';
 import { UserContext } from '../context/UserContext';
 
 export default function Home() {
     const navigate = useNavigate();
     const { user } = useContext(UserContext);
-    const muiTheme = useTheme();
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const mode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
@@ -28,18 +29,9 @@ export default function Home() {
 
     const pages = ['Practice', 'Home', 'History'];
     const features = [
-        {
-            title: 'Extensive Problem Library',
-            desc: '1,825 LeetCode problems across 60 topics, covering Beginner to Advanced levels.',
-        },
-        {
-            title: 'AI-Assisted Scoring',
-            desc: 'Real-time debugging and ChatGPT-based scoring to track your mastery.',
-        },
-        {
-            title: 'Personalized Recommendations',
-            desc: 'Tailored suggestions via grey relational analysis for your unique learning path.',
-        },
+        { title: 'Extensive Problem Library', desc: '1,825 LeetCode problems across 60 topics, covering Beginner to Advanced levels.' },
+        { title: 'AI-Assisted Scoring', desc: 'Real-time debugging and ChatGPT-based scoring to track your mastery.' },
+        { title: 'Personalized Recommendations', desc: 'Tailored suggestions via grey relational analysis for your unique learning path.' },
     ];
     const stack = [
         { label: 'Frontend', detail: 'React & Material UI' },
@@ -71,7 +63,7 @@ Future work will integrate collaborative filtering and expand problem coverage.
                     <Box
                         component="section"
                         sx={{
-                            minHeight: '70vh',
+                            minHeight: '90vh',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
@@ -79,6 +71,7 @@ Future work will integrate collaborative filtering and expand problem coverage.
                             textAlign: 'center',
                             px: 2,
                             py: 8,
+                            position: 'relative',
                             background: mode === 'light'
                                 ? 'linear-gradient(135deg, #EEF2FF 0%, #F9FAFB 100%)'
                                 : 'linear-gradient(135deg, #1C1C2E 0%, #111127 100%)',
@@ -98,6 +91,24 @@ Future work will integrate collaborative filtering and expand problem coverage.
                                 History
                             </Button>
                         </Box>
+
+                        {/* Scroll Indicator */}
+                        <Fade in timeout={1000} style={{ transitionDelay: '1500ms' }}>
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    bottom: 32,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    color: 'text.secondary',
+                                    cursor: 'pointer',
+                                }}
+                                onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                            >
+                                <ExpandMoreIcon fontSize="large" />
+                            </Box>
+                        </Fade>
                     </Box>
 
                     {/* Abstract */}
@@ -109,7 +120,7 @@ Future work will integrate collaborative filtering and expand problem coverage.
                             variant="body1"
                             sx={{
                                 whiteSpace: 'pre-line',
-                                maxWidth: 1000,
+                                maxWidth: 800,
                                 mx: 'auto',
                                 textAlign: 'left',
                                 lineHeight: 2,
@@ -169,6 +180,25 @@ Future work will integrate collaborative filtering and expand problem coverage.
                             ))}
                         </Grid>
                     </Container>
+                    <Container maxWidth="md" sx={{ py: 6 }}>
+                        <Typography variant="h4" fontWeight={600} align="center" gutterBottom>
+                            Our Team
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                whiteSpace: 'pre-line',
+                                maxWidth: 400,
+                                mx: 'auto',
+                                textAlign: 'center', // 这里改成居中
+                                lineHeight: 2,
+                            }}
+                        >
+                            {'Baosheng Jin, Chuke Liu, Jinhan Niu, Mingqian Yang, Xiangxiang Hu, Yue Peng, Yutian Si, Ziye Cao\n(Listed in alphabetical order)\nFaculty mentor: Prof. Hongyi Wen'}
+                        </Typography>
+                    </Container>
+
+
                 </Box>
             </Box>
         </ThemeProvider>

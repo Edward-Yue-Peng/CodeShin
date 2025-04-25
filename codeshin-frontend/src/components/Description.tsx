@@ -98,7 +98,7 @@ const Description: React.FC<DescriptionProps> = ({ problem, loading, error }) =>
             return (
                 <Box
                     component="code"
-                    sx={{ backgroundColor: theme.palette.action.selected, px: 0.5, borderRadius: 0.5, fontFamily: 'Monospace' }}
+                    sx={{ backgroundColor: theme.palette.action.selected, px: 0.5, borderRadius: 0.5, fontFamily: `'Fira Code', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace`, }}
                     {...props}
                 >
                     {children}

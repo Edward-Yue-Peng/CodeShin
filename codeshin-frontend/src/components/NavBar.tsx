@@ -104,7 +104,7 @@ const NavBar: React.FC<NavBarProps> = ({
                         sx={{
                             mr: 2,
                             display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'monospace',
+                            fontFamily: `'Fira Code', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace`,
                             fontWeight: 700,
                             letterSpacing: '.3rem',
                         }}

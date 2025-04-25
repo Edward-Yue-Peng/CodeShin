@@ -67,6 +67,6 @@ urlpatterns = [
 
     # 用户成长系统
 
-    path('api/get_growth_path_advice/', get_growth_path_advice, name='get_growth_path_advice'), # 获取用户成长路径建议
-    path('api/get_user_last_scores/', get_user_last_scores, name='get_user_last_scores'),  # 获取用户最后一次得分
+    path('get_growth_path_advice/', get_growth_path_advice, name='get_growth_path_advice'), # 获取用户成长路径建议
+    path('get_user_last_scores/', get_user_last_scores, name='get_user_last_scores'),  # 获取用户最后一次得分
 ]

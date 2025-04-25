@@ -1,7 +1,7 @@
 // src/pages/History.tsx
-// 用户做题历史与成长功能（分栏布局，支持 Markdown 格式反馈）
+// 用户做题历史与成长功能（分栏布局，支持 Markdown 格式反馈，折线图反序且可点击 Tooltip 并适配暗黑模式）
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
 import {
     Box,
     Typography,
@@ -14,8 +14,9 @@ import {
     CircularProgress,
     Alert,
     Grid,
+    Tooltip,
 } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, useTheme } from '@mui/material/styles';
 import NavBar from '../components/NavBar';
 import { UserContext } from '../context/UserContext';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -25,7 +26,7 @@ import {
     CartesianGrid,
     XAxis,
     YAxis,
-    Tooltip,
+    Tooltip as RechartsTooltip,
     ResponsiveContainer,
 } from 'recharts';
 
@@ -41,9 +42,16 @@ interface ScoreItem {
     problem_id: number;
     score: number;
 }
+interface ChartDataItem {
+    id: number;
+    name: string;
+    score: number;
+    title: string;
+}
 
 function History() {
     const { user } = useContext(UserContext);
+    const muiTheme = useTheme();
     const [historyData, setHistoryData] = useState<HistoryItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -52,7 +60,6 @@ function History() {
     const [scoresLoading, setScoresLoading] = useState<boolean>(false);
     const [scoresError, setScoresError] = useState<string | null>(null);
 
-    // 将建议作为长文本处理
     const [suggestions, setSuggestions] = useState<string>('');
     const [suggestionsLoading, setSuggestionsLoading] = useState<boolean>(true);
     const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
@@ -65,7 +72,6 @@ function History() {
     const pages = ['Practice', 'Home', 'History'];
     const API_URL = import.meta.env.VITE_API_BASE_URL;
 
-    // 获取用户历史记录
     useEffect(() => {
         if (!user) return;
         setLoading(true);
@@ -80,7 +86,6 @@ function History() {
             .finally(() => setLoading(false));
     }, [user]);
 
-    // 获取用户最近得分
     useEffect(() => {
         if (!user) return;
         setScoresLoading(true);
@@ -95,7 +100,6 @@ function History() {
             .finally(() => setScoresLoading(false));
     }, [user]);
 
-    // 获取 GPT 成长反馈（Markdown 文本）
     useEffect(() => {
         if (!user) return;
         setSuggestionsLoading(true);
@@ -110,6 +114,38 @@ function History() {
             .finally(() => setSuggestionsLoading(false));
     }, [user]);
 
+    const chartData = useMemo<ChartDataItem[]>(() =>
+            scoresData
+                .map(item => {
+                    const entry = historyData.find(h => h.problem_id === item.problem_id);
+                    return {
+                        id: item.problem_id,
+                        name: `#${item.problem_id}`,
+                        score: item.score,
+                        title: entry?.problem_id__title || '-',
+                    };
+                })
+                .reverse()
+        , [scoresData, historyData]);
+
+    const CustomizedTick = ({ x, y, payload }: any) => {
+        const dataItem = chartData.find(d => d.name === payload.value);
+        const fillColor = "#666666";
+        return (
+            <Tooltip title={dataItem?.title || ''} arrow placement="top">
+                <text
+                    x={x}
+                    y={y + 10}
+                    textAnchor="middle"
+                    fill={fillColor}
+                    style={{ cursor: dataItem?.title ? 'pointer' : 'default' }}
+                >
+                    {payload.value}
+                </text>
+            </Tooltip>
+        );
+    };
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
@@ -122,7 +158,6 @@ function History() {
             />
             <Box sx={{ p: 3 }}>
                 <Grid container spacing={2}>
-                    {/* 左侧：历史记录 */}
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" fontWeight={600} gutterBottom>
                             History
@@ -136,29 +171,20 @@ function History() {
                                 <Alert severity="error">{error}</Alert>
                             ) : (
                                 <List>
-                                    {historyData.map((entry, index) => {
-                                        const statusText = entry.submission_status
-                                            ? entry.submission_status
-                                            : entry.is_passed
-                                                ? 'Passed'
-                                                : 'Failed';
-                                        return (
-                                            <ListItem key={index} divider>
-                                                <ListItemText
-                                                    primary={entry.problem_id__title}
-                                                    secondary={`ID: ${entry.problem_id} | Ver: ${entry.version} | Status: ${statusText} | Time: ${new Date(
-                                                        entry.timestamp
-                                                    ).toLocaleString()}`}
-                                                />
-                                            </ListItem>
-                                        );
-                                    })}
+                                    {historyData.map((entry, idx) => (
+                                        <ListItem key={idx} divider>
+                                            <ListItemText
+                                                primary={entry.problem_id__title}
+                                                secondary={`ID: ${entry.problem_id} | Ver: ${entry.version} | Status: ${
+                                                    entry.submission_status || (entry.is_passed ? 'Passed' : 'Failed')
+                                                } | Time: ${new Date(entry.timestamp).toLocaleString()}`}
+                                            />
+                                        </ListItem>
+                                    ))}
                                 </List>
                             )}
                         </Paper>
                     </Grid>
-
-                    {/* 右侧：分数曲线 & 成长反馈 */}
                     <Grid item xs={12} md={6} container direction="column" spacing={2}>
                         <Grid item>
                             <Typography variant="h5" fontWeight={600} gutterBottom>
@@ -173,14 +199,11 @@ function History() {
                                     <Alert severity="error">{scoresError}</Alert>
                                 ) : (
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <LineChart
-                                            data={scoresData.map(item => ({ name: `#${item.problem_id}`, score: item.score }))}
-                                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                                        >
+                                        <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                             <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="name" />
+                                            <XAxis dataKey="name" tick={<CustomizedTick />} />
                                             <YAxis />
-                                            <Tooltip />
+                                            <RechartsTooltip />
                                             <Line type="monotone" dataKey="score" />
                                         </LineChart>
                                     </ResponsiveContainer>
@@ -199,11 +222,7 @@ function History() {
                                 ) : suggestionsError ? (
                                     <Alert severity="error">{suggestionsError}</Alert>
                                 ) : (
-                                    <Typography
-                                        variant="body2"
-                                        component="div"
-                                        sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
-                                    >
+                                    <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                                         {suggestions}
                                     </Typography>
                                 )}

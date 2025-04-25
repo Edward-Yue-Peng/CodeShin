@@ -881,10 +881,10 @@ def get_user_last_scores(request):
             last_submission = UserHistory.objects.filter(id=record['last_submission_id']).first()
             if last_submission:
                 last_scores.append({
+                    "problem_title": last_submission.problem_id.title,
                     "problem_id": last_submission.problem_id.id,
-                    "score": last_submission.score
+                    "score": last_submission.score,
                 })
-
         return JsonResponse({"last_scores": last_scores}, status=200)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)

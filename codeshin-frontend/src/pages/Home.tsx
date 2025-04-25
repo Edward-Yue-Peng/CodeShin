@@ -1,77 +1,164 @@
-// src/pages/Home.tsx
-// 首页
-import React, {useState, useEffect, useContext} from 'react';
-import { Box, Button, Typography, ThemeProvider, CssBaseline, Paper } from '@mui/material';
+import React, { useState, useContext } from 'react';
+import {
+    Box,
+    Button,
+    Typography,
+    ThemeProvider,
+    CssBaseline,
+    Grid,
+    Card,
+    CardContent,
+    Container,
+} from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
-
 import NavBar from '../components/NavBar';
-import {UserContext} from "../context/UserContext";
+import { UserContext } from '../context/UserContext';
 
-function Home() {
-
+export default function Home() {
     const navigate = useNavigate();
+    const { user } = useContext(UserContext);
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-    const effectiveMode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
-    const { user } = useContext(UserContext);
+    const mode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
+
     const theme = createTheme({
         palette: {
-            mode: effectiveMode,
+            mode,
+            primary: { main: '#3366FF' },
+            background: { default: '#F4F6F8' },
+            text: { primary: mode === 'dark' ? '#FFF' : '#333' },
         },
+        typography: { fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif' },
     });
 
-
-    const pages = ['Practice','Home',  'History'];
+    const pages = ['Practice', 'Home', 'History'];
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <NavBar
-                onToggleAIPanel={() => {}}
                 pages={pages}
                 currentMode={colorMode}
                 onChangeColorMode={setColorMode}
+                onToggleAIPanel={() => {}}
                 username={user?.username}
             />
+
+            {/* 英雄区 */}
             <Box
+                component="section"
                 sx={{
+                    minHeight: 'calc(100vh - 64px)',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
                     justifyContent: 'center',
-                    height: 'calc(100vh - 64px)',
+                    alignItems: 'center',
                     textAlign: 'center',
-                    p: 3,
-                    backgroundColor: theme.palette.background.default,
+                    px: 2,
+                    background: mode === 'light'
+                        ? 'linear-gradient(135deg, #DDEBFF 0%, #F4F6F8 100%)'
+                        : 'linear-gradient(135deg, #1F1F3F 0%, #252547 100%)',
                 }}
             >
-
-                    <Typography variant="h3" fontWeight={600} gutterBottom>
-                        Welcome to CodeShin!
-                    </Typography>
-                    <Typography variant="h5" color="text.secondary" gutterBottom>
-                        Enhance your coding skills with practice.
-                    </Typography>
-                {/*TODO 暂时隐藏，首页信息待定*/}
-                    {/*<Typography variant="h6" sx={{ mt: 2, fontWeight: 500 }}>*/}
-                    {/*    Problems solved: <strong>{totalProblemsSolved}</strong>*/}
-                    {/*</Typography>*/}
-                    {/*<Typography variant="h6" sx={{ mt: 1, fontWeight: 500 }}>*/}
-                    {/*    Current Level: <strong>{userLevel}</strong>*/}
-                    {/*</Typography>*/}
-                    <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
-                        <Button variant="contained" color="primary" size="large" onClick={() => navigate('/practice')}>
-                            Practice
-                        </Button>
-                        <Button variant="outlined" color="primary" size="large" onClick={() => navigate('/history')}>
-                            History
-                        </Button>
-                    </Box>
+                <Typography
+                    variant="h2"
+                    fontWeight={700}
+                    gutterBottom
+                    sx={{
+                        textShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    }}
+                >
+                    Welcome to CodeShin!
+                </Typography>
+                <Typography variant="h5" color="text.secondary" gutterBottom>
+                    Enhance your coding skills with AI-powered practice.
+                </Typography>
+                <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+                    <Button
+                        variant="contained"
+                        size="large"
+                        onClick={() => navigate('/practice')}
+                    >
+                        Practice
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        size="large"
+                        onClick={() => navigate('/history')}
+                    >
+                        History
+                    </Button>
+                </Box>
             </Box>
+
+            {/* 关键特性 & 系统栈 */}
+            <Container maxWidth="lg" sx={{ py: 6 }}>
+                <Typography variant="h4" fontWeight={600} align="center" gutterBottom>
+                    Key Features
+                </Typography>
+                <Grid container spacing={4} sx={{ mb: 6 }}>
+                    {[
+                        {
+                            title: 'Extensive Problem Library',
+                            desc: '1,825 LeetCode problems across 60 topics, covering Beginner to Advanced levels.',
+                        },
+                        {
+                            title: 'AI-Assisted Scoring',
+                            desc: 'Real-time debugging and ChatGPT-based scoring to track your mastery.',
+                        },
+                        {
+                            title: 'Personalized Recommendations',
+                            desc: 'Tailored suggestions via grey relational analysis for your unique learning path.',
+                        },
+                    ].map((item) => (
+                        <Grid item xs={12} sm={6} md={4} key={item.title}>
+                            <Card
+                                elevation={3}
+                                sx={{
+                                    borderRadius: 3,
+                                    transition: 'transform 0.3s',
+                                    '&:hover': { transform: 'scale(1.04)' },
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h6" fontWeight={500} gutterBottom>
+                                        {item.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {item.desc}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+
+                <Typography variant="h4" fontWeight={600} align="center" gutterBottom>
+                    System Stack
+                </Typography>
+                <Grid container spacing={4}>
+                    {[
+                        { label: 'Frontend', detail: 'React & Material UI' },
+                        { label: 'Backend', detail: 'Django & RESTful APIs' },
+                        { label: 'Database', detail: 'MySQL for data persistence' },
+                    ].map((item) => (
+                        <Grid item xs={12} sm={4} key={item.label}>
+                            <Card elevation={1} sx={{ borderRadius: 2 }}>
+                                <CardContent>
+                                    <Typography variant="subtitle1" fontWeight={600} align="center">
+                                        {item.label}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" align="center">
+                                        {item.detail}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Container>
         </ThemeProvider>
     );
 }
-
-export default Home;

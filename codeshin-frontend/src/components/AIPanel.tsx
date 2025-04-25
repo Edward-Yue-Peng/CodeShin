@@ -1,10 +1,12 @@
 // src/components/AIPanel.tsx
 // AI面板组件
 import React, {useEffect, useState} from 'react';
-import { Box, Typography, Button, TextField } from '@mui/material';
+import {Box, Typography, Button, TextField, IconButton} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import DeleteIcon from '@mui/icons-material/Delete';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -273,20 +275,18 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage ,askPayload}) => {
                     gap: 1
                 }}
             >
-                <Button
-                    variant="outlined"
+                <IconButton
                     size="small"
                     onClick={handleNewChat}
                 >
-                    CLEAR
-                </Button>
-                <Button
-                    variant="outlined"
+                   <DeleteIcon />
+                </IconButton>
+                <IconButton
                     size="small"
                     onClick={handleSamplePrompt}
                 >
-                    HINT
-                </Button>
+                    <LightbulbIcon />
+                </IconButton>
             </Box>
 
             {/* 输入区域 */}

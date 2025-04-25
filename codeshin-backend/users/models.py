@@ -158,6 +158,7 @@ class UserTopicMastery(models.Model):
         db_table = 'user_topic_mastery'  # 数据库表名
         verbose_name = 'User Topic Mastery'
         verbose_name_plural = 'User Topic Masteries'
+        unique_together = ('user_id', 'topic_name')  # 添加唯一约束
 
     def __str__(self):
         return f"{self.user_id.username} - {self.topic_name} (Mastery: {self.mastery_level})"

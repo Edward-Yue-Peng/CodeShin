@@ -71,7 +71,6 @@ def calculate_interest_score_with_time_decay(user_id, topics_i):
     根据用户的历史记录和时间衰减动态计算兴趣得分。
     """
     topic_count = {}
-    # 因为服务器存的是GMT时间，所以这里需要转换一下
     now = datetime.now(timezone.utc)
 
     # 查询用户历史记录
@@ -86,17 +85,22 @@ def calculate_interest_score_with_time_decay(user_id, topics_i):
             decay_factor = 1.0  # 如果没有时间戳，则不衰减
 
         def to_list(x):
-            return x if isinstance(x, list) else [x]
+            if isinstance(x, list):
+                return x
+            elif isinstance(x, str):
+                return x.split(",")  # 将逗号分隔的字符串解析为列表
+            return [x]
 
         # 累计每个主题的权重
-        # TODO 待对接，为什么这里输出的是一个字符串而不是列表
-        # print(record['problem_id__related_topics'])
         for topic in to_list(record['problem_id__related_topics']):
             topic_count[topic] = topic_count.get(topic, 0) + decay_factor
 
     # 计算候选题目相关主题的兴趣得分
-    interest_score = sum(topic_count.get(topic, 0) for topic in topics_i)
+    if not any(topic in topic_count for topic in topics_i):
+        return 50.0  # 如果没有交集，返回默认兴趣得分
+
     max_score = max(topic_count.values(), default=1)  # 避免除以 0
+    interest_score = sum(topic_count.get(topic, 0) for topic in topics_i)
     return (interest_score / max_score) * 100  # 归一化到 0-100
 
 
@@ -155,14 +159,13 @@ def recommender(user_id,cur_pid):
         topics_i = set(api_get("/api/related_topics/", {"problem_id": pid})["related_topics"])
         common = topics_i & set(related_topics)
         score_common = (sum(1 for t in common if topic_level[t] < 3) / len(common) * 100) if common else 0.0
-
         # 难度匹配得分
         try:
             problem_difficulty_data = api_get("/api/problem_difficulty/", {"problem_id": pid})
             difficulty_str = problem_difficulty_data.get("problem_difficulty")
-            difficulty_level_numeric = {"Easy": 1, "Medium": 2, "Hard": 3}.get(difficulty_str, None)
-
-            if difficulty_level_numeric is not None and related_topics:
+            difficulty_level_numeric = {"Easy": 1, "Medium": 2, "Hard": 3}.get(difficulty_str, 0)  # 默认值为 0
+            
+            if difficulty_level_numeric and related_topics:
                 avg_lvl = sum(topic_level.values()) / len(topic_level)
                 diff = abs(difficulty_level_numeric / 3.0 - avg_lvl)
                 score_diff = max(0.0, 1 - diff / 2) * 100

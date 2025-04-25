@@ -83,7 +83,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "yuan_database",
         "USER": "yuanshen",
-        "PASSWORD": "yuanshenqidong",
+        "PASSWORD": "Renheng$0711",
         "HOST": "localhost",  # 或者数据库服务器的IP地址
         "PORT": "3306",  # MySQL默认端口
         "OPTIONS": {

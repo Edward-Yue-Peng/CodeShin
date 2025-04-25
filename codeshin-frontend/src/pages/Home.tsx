@@ -180,23 +180,6 @@ Future work will integrate collaborative filtering and expand problem coverage.
                             ))}
                         </Grid>
                     </Container>
-                    <Container maxWidth="md" sx={{ py: 6 }}>
-                        <Typography variant="h4" fontWeight={600} align="center" gutterBottom>
-                            Our Team
-                        </Typography>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                whiteSpace: 'pre-line',
-                                maxWidth: 400,
-                                mx: 'auto',
-                                textAlign: 'center', // 这里改成居中
-                                lineHeight: 2,
-                            }}
-                        >
-                            {'Baosheng Jin, Chuke Liu, Jinhan Niu, Mingqian Yang, Xiangxiang Hu, Yue Peng, Yutian Si, Ziye Cao\n(Listed in alphabetical order)\nFaculty mentor: Prof. Hongyi Wen'}
-                        </Typography>
-                    </Container>
 
 
                 </Box>

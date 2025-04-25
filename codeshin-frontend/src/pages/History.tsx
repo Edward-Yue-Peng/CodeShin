@@ -156,7 +156,13 @@ function History() {
                 onChangeColorMode={setColorMode}
                 username={user?.username}
             />
-            <Box sx={{ p: 3 }}>
+            <Box
+                sx={{
+                    p: 3,
+                    height: 'calc(100vh - 64px)',
+                    overflowY: 'auto',
+                }}
+            >
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" fontWeight={600} gutterBottom>
@@ -214,7 +220,14 @@ function History() {
                             <Typography variant="h5" fontWeight={600} gutterBottom>
                                 Growth Feedback
                             </Typography>
-                            <Paper elevation={3} sx={{ p: 2, maxHeight: 300, overflowY: 'auto' }}>
+                            <Paper
+                                elevation={3}
+                                sx={{
+                                    p: 2,
+                                    maxHeight: '300px',
+                                    overflowY: 'auto',
+                                }}
+                            >
                                 {suggestionsLoading ? (
                                     <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
                                         <CircularProgress />
@@ -222,7 +235,11 @@ function History() {
                                 ) : suggestionsError ? (
                                     <Alert severity="error">{suggestionsError}</Alert>
                                 ) : (
-                                    <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                                    <Typography
+                                        variant="body2"
+                                        component="div"
+                                        sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+                                    >
                                         {suggestions}
                                     </Typography>
                                 )}

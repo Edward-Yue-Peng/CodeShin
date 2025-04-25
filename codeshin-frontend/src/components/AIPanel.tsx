@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Box, Typography, Button, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {
@@ -207,12 +209,20 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
                                 {msg.sender === 'bot' ? (
                                     <Box
                                         sx={{
+                                            '& p, & li': {
+                                                lineHeight: 1.4,
+                                                marginBottom: 0,
+                                                marginTop:0
+                                            },
                                             typography: 'body2',
                                             color: theme.palette.text.primary
                                         }}
                                     >
-                                        <ReactMarkdown components={markdownComponents}>
-                                            {msg.text}
+                                        <ReactMarkdown
+                                            components={markdownComponents}
+                                            remarkPlugins={[remarkBreaks, remarkGfm]}
+                                        >
+                                            {msg.text.replace(/[\t ]*\n+[\t ]*/g, '\n')}
                                         </ReactMarkdown>
                                     </Box>
                                 ) : (
@@ -241,7 +251,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
                     size="small"
                     onClick={handleNewChat}
                 >
-                    NEW CHAT
+                    CLEAR
                 </Button>
                 <Button
                     variant="outlined"

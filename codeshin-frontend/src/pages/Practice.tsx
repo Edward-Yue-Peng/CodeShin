@@ -1,24 +1,37 @@
 // src/pages/Practice.tsx
 import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
-import { Box, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, CircularProgress } from '@mui/material';
+import {
+    Box,
+    Snackbar,
+    Alert,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Typography,
+    CircularProgress,
+} from '@mui/material';
 import Split from 'react-split';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import NavBar from '../components/NavBar';
 import Description, { ProblemData } from '../components/Description';
 import { UserContext } from '../context/UserContext';
+
 const CodeEditor = lazy(() => import('../components/CodeEditor'));
 const AIPanel = lazy(() => import('../components/AIPanel'));
+
 // 后端的API地址，在.env文件中配置
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Practice() {
     const { user } = useContext(UserContext);
     const pages = ['Practice', 'Home', 'History'];
-    const [code, setCode] = useState<string>("");
+    const [code, setCode] = useState<string>('');
     const [problemID, setProblemID] = useState<number>(0);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [recommendedProblems, setRecommendedProblems] = useState<ProblemData[]>([]);
-    const [feedback, setFeedback] = useState<string>("");
+    const [feedback, setFeedback] = useState<string>('');
     const [score, setScore] = useState<number>(-1);
     const [openRecommendations, setRecommendations] = useState(false);
     const [openFeedback, setOpenFeedback] = useState(false);
@@ -31,10 +44,13 @@ function Practice() {
     // 初始获取用户进度、代码和题目
     const fetchUserData = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/get_progress_and_code/?user_id=${user?.userId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            });
+            const response = await fetch(
+                `${API_URL}/api/get_progress_and_code/?user_id=${user?.userId}`,
+                {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
             if (!response.ok) {
                 console.error('请求失败，使用默认值');
                 setCode("print('Hello World')");
@@ -92,7 +108,7 @@ function Practice() {
                 body: JSON.stringify({
                     user_id: user?.userId,
                     problem_id: problemID,
-                    autosave_code: currentCode || " ",
+                    autosave_code: currentCode || ' ',
                 }),
             });
             if (!response.ok) {
@@ -131,7 +147,6 @@ function Practice() {
         }
     };
 
-    // TODO 重写
     // 用户在推荐对话框中选择题目后，更新题目和代码
     const handleRecommendationSelect = async (selectedId: number) => {
         try {
@@ -157,11 +172,9 @@ function Practice() {
         return res.json();
     }
 
-
     // 提交代码
     const handleSubmit = async () => {
         setOpenFeedback(true);
-        // 先搞个反馈动画
         setLoadingFeedback(true);
         try {
             const response = await fetch(`${API_URL}/api/submit_code/`, {
@@ -182,7 +195,7 @@ function Practice() {
             setFeedback(data.feedback || '');
             setScore(data.score);
         } catch (error: any) {
-            alert("Submission failed: " + error.message);
+            alert('Submission failed: ' + error.message);
         } finally {
             setLoadingFeedback(false);
         }
@@ -218,8 +231,12 @@ function Practice() {
     const [splitSizes, setSplitSizes] = useState<number[]>([25, 50, 25]);
     const [aiVisible, setAiVisible] = useState(true);
     const [colorMode, setColorMode] = useState<'system' | 'light' | 'dark'>('system');
-    const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const effectiveMode = colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
+    const prefersDarkMode =
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effectiveMode =
+        colorMode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : colorMode;
+    const [askPayload, setAskPayload] = useState<{ question: string; snippet: string } | null>(null);
+
     const theme = createTheme({
         palette: {
             mode: effectiveMode,
@@ -261,20 +278,12 @@ function Practice() {
                             minHeight: 0,
                         }}
                     >
-                        <Description
-                            problem={problem}
-                            loading={loadingProblem}
-                            error={problemError}
-                        />
+                        <Description problem={problem} loading={loadingProblem} error={problemError} />
                     </Box>
-                    {/* 中间：代码编辑器 */}
+
+                    {/* 中间：代码编辑器，新增 onAsk */}
                     <Box
-                        sx={{
-                            borderRight: '1px solid',
-                            borderColor: 'divider',
-                            overflow: 'auto',
-                            minHeight: 0,
-                        }}
+                        sx={{ borderRight: '1px solid', borderColor: 'divider', overflow: 'auto', minHeight: 0 }}
                     >
                         <Suspense fallback={<div>Loading Code Editor...</div>}>
                             <CodeEditor
@@ -282,20 +291,22 @@ function Practice() {
                                 onCodeChange={setCode}
                                 onSave={handleSave}
                                 onSubmit={handleSubmit}
+                                onAsk={(question, snippet) => {
+                                    // 确保面板展开
+                                    setAiVisible(true);
+                                    // 原有 GPT 通道不变，只多传一次带代码的 prompt
+                                    setAskPayload({ question, snippet });
+                                }}
                             />
                         </Suspense>
                     </Box>
+
                     {/* 右侧：AI 面板 */}
                     {aiVisible && (
-                        <Box
-                            sx={{
-                                backgroundColor: 'background.paper',
-                                overflow: 'auto',
-                                minHeight: 0,
-                            }}
-                        >
+                        <Box sx={{ backgroundColor: 'background.paper', overflow: 'auto', minHeight: 0 }}>
                             <Suspense fallback={<div>Loading AI Panel...</div>}>
-                                <AIPanel onSendMessage={handleSendAIPanelMessage} />
+                                <AIPanel askPayload={askPayload}
+                                         onSendMessage={handleSendAIPanelMessage} />
                             </Suspense>
                         </Box>
                     )}
@@ -306,26 +317,23 @@ function Practice() {
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={3000}
-                onClose={()=>setOpenSnackbar(false)}
+                onClose={() => setOpenSnackbar(false)}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                <Alert onClose={()=>setOpenSnackbar(false)} severity="info">
+                <Alert onClose={() => setOpenSnackbar(false)} severity="info">
                     Saved
                 </Alert>
             </Snackbar>
 
             {/* 提交后的反馈对话框 */}
-            <Dialog
-                open={openFeedback}
-                onClose={() => setOpenFeedback(false)}
-                fullWidth
-                maxWidth="sm"
-            >
+            <Dialog open={openFeedback} onClose={() => setOpenFeedback(false)} fullWidth maxWidth="sm">
                 <DialogTitle>
-                    <span role="img" aria-label="feedback">💡</span>Feedback of {problem?.title}
+          <span role="img" aria-label="feedback">
+            💡
+          </span>
+                    Feedback of {problem?.title}
                 </DialogTitle>
                 <DialogContent dividers>
-                    {/*反馈动画*/}
                     {loadingFeedback ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
                             <CircularProgress />
@@ -342,11 +350,7 @@ function Practice() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button
-                        variant="outlined"
-                        onClick={() => setOpenFeedback(false)}
-                        disabled={loadingFeedback}
-                    >
+                    <Button variant="outlined" onClick={() => setOpenFeedback(false)} disabled={loadingFeedback}>
                         Revise
                     </Button>
                     <Button

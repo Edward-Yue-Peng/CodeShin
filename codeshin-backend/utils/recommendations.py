@@ -13,7 +13,7 @@ def load_user_candidate_metrics(user_id):
     logs = RecommendationLog.objects.filter(user_id=user_id).order_by('-timestamp')[:5]
     return [[log.score_sim, log.score_common, log.score_diff, log.score_knowledge, log.score_interest, log.score_path] for log in logs]
 
-
+# adella
 def save_user_candidate_metrics(user_id, problem_id, candidate_metrics):
     """
     将推荐参数保存到 RecommendationLog 中。

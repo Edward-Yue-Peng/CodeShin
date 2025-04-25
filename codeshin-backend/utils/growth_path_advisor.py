@@ -55,7 +55,7 @@ def call_gpt_for_growth_path(user_id):
         },
         {
             "role": "user",
-            "content": f"Here is the user's growth path: {gpt_input}. Please provide suggestions for improvement."
+            "content": f"""Here is the user's growth path: {gpt_input}. Please provide suggestions for improvement. Your feedback should be concise and clear (one short paragraph describing the user's existing growth path and another short paragraph with suggestions for improvement, no more than 150 words in total)."""
         }
     ]
 

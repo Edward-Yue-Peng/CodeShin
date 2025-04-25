@@ -37,7 +37,7 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage ,askPayload}) => {
     useEffect(() => {
                 if (!askPayload) return;
                 const { question, snippet } = askPayload;
-                const prompt = `Here is the code:\n${snippet}\n\nUser question: ${question}`;
+                const prompt = `Quote: ${snippet}\n${question}`;
                         setMessages(prev => [
                                 ...prev,
                                 { sender: 'user', text: prompt },

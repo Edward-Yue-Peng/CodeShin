@@ -1,6 +1,6 @@
 // src/components/AIPanel.tsx
 // AI面板组件
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Box, Typography, Button, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ReactMarkdown from 'react-markdown';
@@ -16,9 +16,10 @@ import {
 // 具体的API请求和处理逻辑在父组件中实现
 interface AIPanelProps {
     onSendMessage: (message: string) => Promise<string>;
+    askPayload?: { question: string; snippet: string } | null;
 }
 
-const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
+const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage ,askPayload}) => {
     const theme = useTheme();
     // 根据主题模式动态设置 bot 气泡背景
     const botBubbleColor =
@@ -33,7 +34,33 @@ const AIPanel: React.FC<AIPanelProps> = ({ onSendMessage }) => {
     >([{ sender: 'bot', text: 'Hello! How can I help you today?' }]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-
+    useEffect(() => {
+                if (!askPayload) return;
+                const { question, snippet } = askPayload;
+                const prompt = `Here is the code:\n${snippet}\n\nUser question: ${question}`;
+                        setMessages(prev => [
+                                ...prev,
+                                { sender: 'user', text: prompt },
+                                { sender: 'bot', text: 'I am thinking...' }
+                            ]);
+                setLoading(true);
+                        onSendMessage(prompt)
+                    .then(reply => {
+                            setMessages(prev => {
+                                    const copy = [...prev];
+                                    copy[copy.length - 1] = { sender: 'bot', text: reply };
+                                    return copy;
+                                });
+                        })
+                    .catch(err => {
+                            setMessages(prev => {
+                                    const copy = [...prev];
+                                    copy[copy.length - 1] = { sender: 'bot', text: `Error: ${err.message}` };
+                                    return copy;
+                                });
+                        })
+                    .finally(() => setLoading(false));
+            }, [askPayload]);
     const handleSend = async () => {
         if (!input.trim() || loading) return;
 

@@ -2,6 +2,18 @@
 
 CODESHIN is an AI-powered coding platform that provides an interactive environment for practicing coding problems, analyzing solutions, and engaging with an AI assistant for guidance. This project is built with React, Material-UI (MUI), and Monaco Editor to offer a modern, responsive, and dark-mode-supported UI.
 
+## 历史页
+<img width="1454" alt="history" src="https://github.com/user-attachments/assets/8f8b3778-313c-4ef8-8816-215e6ce181ec" />
+
+## 主页
+![home](https://github.com/user-attachments/assets/98035079-5a36-4e49-beff-2e188bb5c0eb)
+
+## 登录页
+<img width="1567" alt="login" src="https://github.com/user-attachments/assets/2816ef71-6ebd-47cf-98c1-51abe8e3ac60" />
+
+## 代码练习
+![practice](https://github.com/user-attachments/assets/edc228a3-3e77-4178-8586-50b75fdca910)
+
 # 源神，启动！
 ## 第一步：安装 MySQL 数据库
 ### Windows 
